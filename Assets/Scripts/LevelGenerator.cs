@@ -7,7 +7,6 @@ public class LevelGenerator : MonoBehaviour
 {
     public GameObject[] levelSection;
     GameObject instance;
-    bool down, left;
     int currElement;
     int[,] levelMap =
     {
@@ -44,8 +43,7 @@ public class LevelGenerator : MonoBehaviour
             {
                 currElement = levelMap[i, j];
                 instance = Instantiate(levelSection[currElement], new Vector2(i, j), Quaternion.identity);
-                if (currElement != 7)
-                    instance.transform.rotation = determineRote(i, j);
+                instance.transform.rotation = determineRote(i, j);
             }
         }
     }
@@ -55,54 +53,82 @@ public class LevelGenerator : MonoBehaviour
 
     Quaternion determineRote(int i, int j)
     {
-        return inCornRote(i, j);
-        //   switch (currElement)
-        //    {
-        //        case 1: return inCornRote(i, j);
-        //        case 2:
-        //        case 3:
-        //        case 4:
-        //        default: return Quaternion.identity;
-        //    }
-        //}
-        //Quaternion wallRote(int i, int j)
-        //{
-
-        }
-    Quaternion inCornRote(int i, int j)
-    {
-
-        int currRote = 0;
-        RaycastHit2D leftHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.up, 1);
-
-        for (int k = 0; k < 4; k++)
+        switch (currElement)
         {
-            if (j == levelMap.GetLength(1) - 1 && i == 7)
-                return Quaternion.Euler(0, 0, -90);
-            if (i == 9 && j == 8)
-                return Quaternion.Euler(0, 0, 90);
-            if (i == 10 && j == 8)
-                return Quaternion.Euler(0, 0, 0);
-            RaycastHit2D hit;
-            if (leftHit && leftHit.collider.CompareTag("Wall") && currElement != 2 && currElement != 4)
-            {
-                hit = Physics2D.Raycast(new Vector2(i, j), instance.transform.right, 1);
-            }
-            else
-                hit = Physics2D.Raycast(new Vector2(i, j), instance.transform.up, 1);
-            if (hit && hit.collider.CompareTag("Wall"))
-            {
-                Debug.Log("Hit");
-                if (currElement == 4 && hit.collider.gameObject.GetComponent<SpriteRenderer>().sprite == instance.GetComponent<SpriteRenderer>().sprite)
-                    return hit.collider.gameObject.transform.rotation * Quaternion.Euler(0, 0, 0);
-                else
-                    return Quaternion.Euler(0, 0, currRote);
-            }
-            currRote += 90;
-            instance.transform.rotation = Quaternion.Euler(0, 0, currRote);
+            case 1: return cornerRote(i, j);
+            case 2: return wallRote(i, j);
+            case 3: return cornerRote(i, j);
+            case 4:  return wallRote(i, j);
+            default: return Quaternion.identity;
         }
-        Debug.Log("Fail");
-        return Quaternion.identity;
+    }
+    Quaternion wallRote(int i, int j) //determines rotation of the wall elements
+    {
+        RaycastHit2D hit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1);
+        if (hit)
+            if (hit.collider.gameObject.GetComponent<SpriteRenderer>().sprite == instance.GetComponent<SpriteRenderer>().sprite)//checks if left side is another wall
+                return hit.collider.transform.rotation * Quaternion.identity; //if hiting another wall set rotation to that ones
+            else
+                return Quaternion.Euler(0, 0, 90);//if hit map and not another wall must be horizontally rotated
+        else
+            return Quaternion.identity; //if no wall hit must be vertical
+    }
+    Quaternion cornerRote(int i, int j)//determine the rotation of a corner piece
+    {
+        //special cases where raycasts not most efficent way
+        if (j == levelMap.GetLength(1) - 1 && i == 7)
+            return Quaternion.Euler(0, 0, -90);
+        else if (i == 9 && j == 8)
+            return Quaternion.Euler(0, 0, 90);
+        else if (i == 10 && j == 8)
+            return Quaternion.Euler(0, 0, 0);
+        //cases based on raycast findings
+        else
+        {
+            //detect if another map piece is either to the left or below the current piece as during generation these only two pieces which matter for determing corner rotation
+            RaycastHit2D leftHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1);
+            RaycastHit2D downtHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.up, 1);
+            if (leftHit && downtHit)
+                return Quaternion.Euler(0, 0, 180);
+            else if (leftHit)
+                return Quaternion.Euler(0, 0, 90);
+            else if (downtHit)
+                return Quaternion.Euler(0, 0, -90);
+            else return Quaternion.identity;
+        }
+
+
+
+        /////////is stuff below better or worse, also can somehow integrate the two versions
+        /////overall both seem around same efficenty but up seems possibly better???????
+
+
+        //int currRote = 0;
+        
+
+        //for (int k = 0; k < 4; k++)
+        //{
+        //    if (j == levelMap.GetLength(1) - 1 && i == 7)
+        //        return Quaternion.Euler(0, 0, -90);
+        //    if (i == 9 && j == 8)
+        //        return Quaternion.Euler(0, 0, 90);
+        //    if (i == 10 && j == 8)
+        //        return Quaternion.Euler(0, 0, 0);
+        //    RaycastHit2D hit;
+        //    if (leftHit && leftHit.collider.CompareTag("Wall"))
+        //    {
+        //        hit = Physics2D.Raycast(new Vector2(i, j), instance.transform.right, 1);
+        //    }
+        //    else
+        //        hit = Physics2D.Raycast(new Vector2(i, j), instance.transform.up, 1);
+        //    if (hit && hit.collider.CompareTag("Wall"))
+        //    {
+        //        return Quaternion.Euler(0, 0, currRote);
+        //    }
+        //    currRote += 90;
+        //    instance.transform.rotation = Quaternion.Euler(0, 0, currRote);
+        //}
+        //return Quaternion.identity;
     }
 
   
