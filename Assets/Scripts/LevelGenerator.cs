@@ -37,14 +37,22 @@ public class LevelGenerator : MonoBehaviour
     void Start() //generate the other three quadrants of the map based on original quadrant
     {
        // Destroy(mapSection.GetComponent<LevelGenerator>());
-        GenerateSections(-levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, 1, 1);
-        GenerateSections(-levelMap.GetLength(1) + 2, levelMap.GetLength(0) - 1, 1, -1);
-        GenerateSections(levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, -1, 1);
+        GenerateSections(-levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, 1, 1, true);
+        GenerateSections(-levelMap.GetLength(1) + 2, levelMap.GetLength(0) - 1, 1, -1, true);
+        GenerateSections(levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, -1, 1, false);
+        mapSection.transform.parent.transform.rotation = Quaternion.Euler(0, 0, 90); //sets entire map rotation
     }
-    void GenerateSections(int xPos, int yPos, int xScale, int yScale) //determine position and scale of the other section
+    void GenerateSections(int xPos, int yPos, int xScale, int yScale, bool delete) //determine position and scale of the other section
     {
-        GameObject section = Instantiate(mapSection, new Vector2(xPos, yPos), Quaternion.identity);
+        GameObject section = Instantiate(mapSection, new Vector2(xPos, yPos), Quaternion.identity, mapSection.transform.parent.transform);
         section.transform.localScale = new Vector2(xScale, yScale);
+        if(delete)
+        {
+            for(int i = levelMap.Length -1 ; i >= levelMap.Length - levelMap.GetLength(1); i--)
+            {
+                Destroy(section.transform.GetChild(i).gameObject); //delete the double up sections which overlapp
+            }
+        }
     }
     void GenerateMap() //generates a quadrant
     {
