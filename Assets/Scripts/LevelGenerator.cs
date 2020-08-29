@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEditorInternal;
 using UnityEngine;
 
 public class LevelGenerator : MonoBehaviour
 {
     public GameObject[] levelSection;
+    public GameObject mapSection;
     GameObject instance;
     int currElement;
     int[,] levelMap =
@@ -26,32 +28,38 @@ public class LevelGenerator : MonoBehaviour
         {2,2,2,2,2,1,5,3,3,0,4,0,0,0},
         {0,0,0,0,0,0,5,0,0,0,4,0,0,0},
     };
-    private void Awake()
-    {
-        //levelPrefabs = new GameObject[levelMap.GetLength(0), levelMap.GetLength(1)];
-    }
-    void Start()
+    private void Awake() //generate the first quadrant of the map
     {
         GenerateMap();
+        mapSection.transform.position = new Vector2(levelMap.GetLength(1) + 2, levelMap.GetLength(0) - 1);
+        mapSection.transform.localScale = new Vector2(-1, -1);
     }
-
-    void GenerateMap()
+    void Start() //generate the other three quadrants of the map based on original quadrant
+    {
+       // Destroy(mapSection.GetComponent<LevelGenerator>());
+        GenerateSections(-levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, 1, 1);
+        GenerateSections(-levelMap.GetLength(1) + 2, levelMap.GetLength(0) - 1, 1, -1);
+        GenerateSections(levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, -1, 1);
+    }
+    void GenerateSections(int xPos, int yPos, int xScale, int yScale) //determine position and scale of the other section
+    {
+        GameObject section = Instantiate(mapSection, new Vector2(xPos, yPos), Quaternion.identity);
+        section.transform.localScale = new Vector2(xScale, yScale);
+    }
+    void GenerateMap() //generates a quadrant
     {
         for (int i = 0; i < levelMap.GetLength(0); i++)
         {
             for (int j = 0; j < levelMap.GetLength(1); j++)
             {
                 currElement = levelMap[i, j];
-                instance = Instantiate(levelSection[currElement], new Vector2(i, j), Quaternion.identity);
+                instance = Instantiate(levelSection[currElement], new Vector2(i, j), Quaternion.identity, mapSection.transform);
                 instance.transform.rotation = determineRote(i, j);
             }
         }
     }
-    //final idea
-    //use raycasts(if flat do both have same rote)
-    //if corner determine side hit from then rotate accordingly
 
-    Quaternion determineRote(int i, int j)
+    Quaternion determineRote(int i, int j) //determines objects rotation based on type of piece it is
     {
         switch (currElement)
         {
