@@ -1,31 +1,31 @@
 fileFormatVersion: 2
-guid: 80a08b1841dc04542bc773ba9f87e730
+guid: af9fa883cc306304ba2de3fe882f82c8
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5798744576634626810
-    second: NoHornSheepRecoverResolve_0
+      213: -3110131594912100629
+    second: NoHornSheepRecover (3)_0
   - first:
-      213: 4478113606164419969
-    second: NoHornSheepRecoverResolve_1
+      213: -112072655006957745
+    second: NoHornSheepRecover (3)_1
   - first:
-      213: -8324639456822533847
-    second: NoHornSheepRecoverResolve_2
+      213: -1674366798985909487
+    second: NoHornSheepRecover (3)_2
   - first:
-      213: 8219042730021204171
-    second: NoHornSheepRecoverResolve_3
+      213: 3273153859710033767
+    second: NoHornSheepRecover (3)_3
   - first:
-      213: 689495533982517402
-    second: NoHornSheepRecoverResolve_4
+      213: -7485235547027403171
+    second: NoHornSheepRecover (3)_4
   - first:
-      213: 5109879403002384143
-    second: NoHornSheepRecoverResolve_5
+      213: 515887945430874586
+    second: NoHornSheepRecover (3)_5
   - first:
-      213: 5466277799799282874
-    second: NoHornSheepRecoverResolve_6
+      213: -1348953175567557093
+    second: NoHornSheepRecover (3)_6
   - first:
-      213: 1286778368931884330
-    second: NoHornSheepRecoverResolve_7
+      213: -5479805341755386133
+    second: NoHornSheepRecover (3)_7
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -146,7 +146,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: NoHornSheepRecoverResolve_0
+      name: NoHornSheepRecover (3)_0
       rect:
         serializedVersion: 2
         x: 0
@@ -160,14 +160,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: af2a7892877497050800000000000000
-      internalID: 5798744576634626810
+      spriteID: bee8b88eac796d4d0800000000000000
+      internalID: -3110131594912100629
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NoHornSheepRecoverResolve_1
+      name: NoHornSheepRecover (3)_1
       rect:
         serializedVersion: 2
         x: 190
@@ -181,14 +181,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 18516474994752e30800000000000000
-      internalID: 4478113606164419969
+      spriteID: f4f76499386d17ef0800000000000000
+      internalID: -112072655006957745
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NoHornSheepRecoverResolve_2
+      name: NoHornSheepRecover (3)_2
       rect:
         serializedVersion: 2
         x: 380
@@ -202,14 +202,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 92164e41580f87c80800000000000000
-      internalID: -8324639456822533847
+      spriteID: 11bacba744473c8e0800000000000000
+      internalID: -1674366798985909487
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NoHornSheepRecoverResolve_3
+      name: NoHornSheepRecover (3)_3
       rect:
         serializedVersion: 2
         x: 570
@@ -223,14 +223,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bc0bbac01d7ef0270800000000000000
-      internalID: 8219042730021204171
+      spriteID: 76f173fe7149c6d20800000000000000
+      internalID: 3273153859710033767
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NoHornSheepRecoverResolve_4
+      name: NoHornSheepRecover (3)_4
       rect:
         serializedVersion: 2
         x: 0
@@ -244,14 +244,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a980f39f884919900800000000000000
-      internalID: 689495533982517402
+      spriteID: d5e0e4fade91f1890800000000000000
+      internalID: -7485235547027403171
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NoHornSheepRecoverResolve_5
+      name: NoHornSheepRecover (3)_5
       rect:
         serializedVersion: 2
         x: 190
@@ -265,14 +265,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f0fca056e30f9e640800000000000000
-      internalID: 5109879403002384143
+      spriteID: ad930536a5dc82700800000000000000
+      internalID: 515887945430874586
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NoHornSheepRecoverResolve_6
+      name: NoHornSheepRecover (3)_6
       rect:
         serializedVersion: 2
         x: 380
@@ -286,14 +286,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: abcd3a482be1cdb40800000000000000
-      internalID: 5466277799799282874
+      spriteID: b1e19afdb3e874de0800000000000000
+      internalID: -1348953175567557093
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NoHornSheepRecoverResolve_7
+      name: NoHornSheepRecover (3)_7
       rect:
         serializedVersion: 2
         x: 570
@@ -307,8 +307,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a2d67d0eb1e8bd110800000000000000
-      internalID: 1286778368931884330
+      spriteID: be6d16e2312d3f3b0800000000000000
+      internalID: -5479805341755386133
       vertices: []
       indices: 
       edges: []
