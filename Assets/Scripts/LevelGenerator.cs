@@ -10,21 +10,23 @@ public class LevelGenerator : MonoBehaviour
     public GameObject mapSection;
     GameObject instance;
     int currElement;
+    public static int[] emptyChanges;
+
     int[,] levelMap =
     {
         {1,2,2,2,2,2,2,2,2,2,2,2,2,7},
         {2,5,5,5,5,5,5,5,5,5,5,5,5,4},
         {2,5,3,4,4,3,5,3,4,4,4,3,5,4},
-        {2,6,4,0,0,4,5,4,0,0,0,4,5,4},
+        {2,6,4,8,8,4,5,4,8,8,8,4,5,4},
         {2,5,3,4,4,3,5,3,4,4,4,3,5,3},
         {2,5,5,5,5,5,5,5,5,5,5,5,5,5},
         {2,5,3,4,4,3,5,3,3,5,3,4,4,4},
         {2,5,3,4,4,3,5,4,4,5,3,4,4,3},
         {2,5,5,5,5,5,5,4,4,5,5,5,5,4},
         {1,2,2,2,2,1,5,4,3,4,4,3,0,4},
-        {0,0,0,0,0,2,5,4,3,4,4,3,0,3},
-        {0,0,0,0,0,2,5,4,4,0,0,0,0,0},
-        {0,0,0,0,0,2,5,4,4,0,3,4,4,0},
+        {9,9,9,9,9,2,5,4,3,4,4,3,0,3},
+        {9,9,9,9,9,2,5,4,4,0,0,0,0,0},
+        {9,9,9,9,9,2,5,4,4,0,3,4,4,0},
         {2,2,2,2,2,1,5,3,3,0,4,0,0,0},
         {0,0,0,0,0,0,5,0,0,0,4,0,0,0},
     };
@@ -48,7 +50,7 @@ public class LevelGenerator : MonoBehaviour
         section.transform.localScale = new Vector2(xScale, yScale);
         if(delete)
         {
-            for(int i = levelMap.Length -1 ; i >= levelMap.Length - levelMap.GetLength(1); i--)
+            for(int i = section.transform.childCount - 1; i >= section.transform.childCount -2; i--)
             {
                 Destroy(section.transform.GetChild(i).gameObject); //delete the double up sections which overlapp
             }
@@ -61,12 +63,15 @@ public class LevelGenerator : MonoBehaviour
             for (int j = 0; j < levelMap.GetLength(1); j++)
             {
                 currElement = levelMap[i, j];
-                instance = Instantiate(levelSection[currElement], new Vector2(i, j), Quaternion.identity, mapSection.transform);
-                instance.transform.rotation = determineRote(i, j);
+                if (currElement != 0)
+                {
+                    instance = Instantiate(levelSection[currElement], new Vector2(i, j), Quaternion.identity, mapSection.transform);
+                    instance.transform.rotation = determineRote(i, j);
+                }
             }
         }
     }
-
+   
     Quaternion determineRote(int i, int j) //determines objects rotation based on type of piece it is
     {
         switch (currElement)
