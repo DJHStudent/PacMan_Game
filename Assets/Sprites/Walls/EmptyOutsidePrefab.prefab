@@ -98,3 +98,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 435f6c1d5b1fb214ab1193c0c31d661b, type: 3}
   - {fileID: 21300000, guid: 223f126053ebd56458be8454be562901, type: 3}
   - {fileID: 21300000, guid: bd00101010745534fa1b30709253477e, type: 3}
+  - {fileID: 21300000, guid: 8713b18e70a29d444840e380b8b75bd7, type: 3}
+  probs:
+  - 0.9
+  - 0.07
+  - 0.05
+  - 0.015
