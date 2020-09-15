@@ -4,24 +4,14 @@ using UnityEngine;
 
 public class PacmanMove : MonoBehaviour
 {
-    // Start is called before the first frame update
-    [SerializeField]
     Vector2 direction, nextDirection, newPos;
     void Start()
     {       
         direction = Vector2.left;
         nextDirection = Vector2.down;
         newPos = new Vector2(transform.position.x - 1, transform.position.y);
-       // DetermineNewPos();
     }
-    //first check direction dowable
-    //move to next spot 1 unit along
-    //check if can change and need to
-    //repeat
 
-
-
-    // Update is called once per frame
     void Update()
     {
         Move();
@@ -31,8 +21,7 @@ public class PacmanMove : MonoBehaviour
         if (!IsDirection(direction))
         {
             Vector2 currPos = new Vector2(transform.position.x, transform.position.y);
-            if (currPos != newPos)//direction == Vector2.up && currPos.y <= newPos.y || direction == Vector2.right && currPos.x <= newPos.x
-                //|| direction == Vector2.left && currPos.x >= newPos.x || direction == Vector2.down && currPos.y >= newPos.y)
+            if (currPos != newPos)
             {
                 transform.position = Vector2.MoveTowards(transform.position, newPos, Time.deltaTime);
             }
@@ -54,9 +43,7 @@ public class PacmanMove : MonoBehaviour
     void DetermineNewPos()
     {
         if (IsDirection(nextDirection))
-        {
             getNewPos();
-        }
         else
             DetermineDirection();
     }
@@ -107,10 +94,6 @@ public class PacmanMove : MonoBehaviour
         getNewPos();
     }
 
-    void CheckDirection()
-    {
-       // if(!Physics2D.Raycast(transform.position, nextDirection, .5f))
-    }
     void Movse(Vector2 dir)
     {
         if (Physics2D.Raycast(transform.position, nextDirection, .5f))// && Physics2D.Raycast(transform.position, nextDirection, .5f))

@@ -1,12 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ChooseSprite : MonoBehaviour
 {
     public Sprite[] sprite;
     public float[] probs;
-    // Start is called before the first frame update
     void Start()
     {
         GetComponent<SpriteRenderer>().sprite = determineSprite();
@@ -40,7 +37,6 @@ public class ChooseSprite : MonoBehaviour
             else
                 randElement -= probs[i];
         }
-
         return sprite[sprite.Length - 1]; 
     }
 }

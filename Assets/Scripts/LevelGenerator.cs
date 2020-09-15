@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using UnityEditorInternal;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class LevelGenerator : MonoBehaviour
 {
@@ -38,7 +34,6 @@ public class LevelGenerator : MonoBehaviour
     }
     void Start() //generate the other three quadrants of the map based on original quadrant
     {
-       // Destroy(mapSection.GetComponent<LevelGenerator>());
         GenerateSections(-levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, 1, 1, true);
         GenerateSections(-levelMap.GetLength(1) + 2, levelMap.GetLength(0) - 1, 1, -1, true);
         GenerateSections(levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, -1, 1, false);
@@ -117,39 +112,6 @@ public class LevelGenerator : MonoBehaviour
                 return Quaternion.Euler(0, 0, -90);
             else return Quaternion.identity;
         }
-
-
-
-        /////////is stuff below better or worse, also can somehow integrate the two versions
-        /////overall both seem around same efficenty but up seems possibly better???????
-
-
-        //int currRote = 0;
-        
-
-        //for (int k = 0; k < 4; k++)
-        //{
-        //    if (j == levelMap.GetLength(1) - 1 && i == 7)
-        //        return Quaternion.Euler(0, 0, -90);
-        //    if (i == 9 && j == 8)
-        //        return Quaternion.Euler(0, 0, 90);
-        //    if (i == 10 && j == 8)
-        //        return Quaternion.Euler(0, 0, 0);
-        //    RaycastHit2D hit;
-        //    if (leftHit && leftHit.collider.CompareTag("Wall"))
-        //    {
-        //        hit = Physics2D.Raycast(new Vector2(i, j), instance.transform.right, 1);
-        //    }
-        //    else
-        //        hit = Physics2D.Raycast(new Vector2(i, j), instance.transform.up, 1);
-        //    if (hit && hit.collider.CompareTag("Wall"))
-        //    {
-        //        return Quaternion.Euler(0, 0, currRote);
-        //    }
-        //    currRote += 90;
-        //    instance.transform.rotation = Quaternion.Euler(0, 0, currRote);
-        //}
-        //return Quaternion.identity;
     }
 
   

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class DetermineSound : MonoBehaviour
 {
@@ -11,7 +9,6 @@ public class DetermineSound : MonoBehaviour
         audioSource = gameObject.GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         PlayAudio(normalClip);
