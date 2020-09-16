@@ -222,8 +222,8 @@ Camera:
   m_GameObject: {fileID: 519420028}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 1}
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0, g: 0.47330323, b: 0.50980395, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -240,7 +240,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 14.5
+  orthographic size: 16
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -425,7 +425,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelSection:
-  - {fileID: 4338323962370237298, guid: 3e6afaa4d04974d498c993af9634d1bf, type: 3}
+  - {fileID: 3878362053877652143, guid: a9db2df80719ed9448f3ba05c646be61, type: 3}
   - {fileID: 3674444065689870209, guid: 6949b2fc02c06524c9a76696a0f0888f, type: 3}
   - {fileID: 8533227104370397162, guid: 180499b61019b194892b740e92f77a40, type: 3}
   - {fileID: 3887098512766927932, guid: 1eaddff19bdc64a47a65666e44a52fdf, type: 3}
@@ -2601,10 +2601,10 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
   ForceModule:
-    enabled: 0
+    enabled: 1
     x:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -2657,7 +2657,7 @@ ParticleSystem:
         m_RotationOrder: 4
     y:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -2710,7 +2710,7 @@ ParticleSystem:
         m_RotationOrder: 4
     z:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -2761,8 +2761,8 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    inWorldSpace: 0
-    randomizePerFrame: 0
+    inWorldSpace: 1
+    randomizePerFrame: 1
   ExternalForcesModule:
     serializedVersion: 2
     enabled: 0
@@ -4417,7 +4417,7 @@ ParticleSystem:
     sizeAffectsWidth: 1
     sizeAffectsLifetime: 0
     inheritParticleColor: 1
-    generateLightingData: 0
+    generateLightingData: 1
     splitSubEmitterRibbons: 0
     attachRibbonsToTransform: 0
     colorOverLifetime:
@@ -5220,7 +5220,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2696125926999368621, guid: 5518ceef149c2d444abfe2a69b3a0a93,
+  m_Sprite: {fileID: 1306929079380724301, guid: 5518ceef149c2d444abfe2a69b3a0a93,
     type: 3}
   m_Type: 0
   m_PreserveAspect: 0
@@ -5239,6 +5239,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 811903465}
   m_CullTransparentMesh: 0
+--- !u!1 &849265650 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 19088578821357987, guid: a4f018d9869386e418743be65d762c4c,
+    type: 3}
+  m_PrefabInstance: {fileID: 19088579658319938}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &849265651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 849265650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e894d049483d9545a4b4955e41fbb0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1190946739
 GameObject:
   m_ObjectHideFlags: 0
@@ -5386,7 +5404,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2696125926999368621, guid: 5518ceef149c2d444abfe2a69b3a0a93,
+  m_Sprite: {fileID: 1306929079380724301, guid: 5518ceef149c2d444abfe2a69b3a0a93,
     type: 3}
   m_Type: 0
   m_PreserveAspect: 0
@@ -5647,7 +5665,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2696125926999368621, guid: 5518ceef149c2d444abfe2a69b3a0a93,
+  m_Sprite: {fileID: 1306929079380724301, guid: 5518ceef149c2d444abfe2a69b3a0a93,
     type: 3}
   m_Type: 0
   m_PreserveAspect: 0
@@ -5673,6 +5691,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2102156506, guid: a4f018d9869386e418743be65d762c4c, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 19088578821357985, guid: a4f018d9869386e418743be65d762c4c,
         type: 3}
       propertyPath: m_WasSpriteAssigned

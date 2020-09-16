@@ -45,9 +45,9 @@ public class LevelGenerator : MonoBehaviour
         section.transform.localScale = new Vector2(xScale, yScale);
         if(delete)
         {
-            for(int i = section.transform.childCount - 1; i >= section.transform.childCount -2; i--)
+            for(int i = section.transform.childCount - 1; i >= section.transform.childCount - 2; i--)
             {
-                Destroy(section.transform.GetChild(i).gameObject); //delete the double up sections which overlapp
+                Destroy(section.transform.GetChild(i).gameObject); //delete the sections which overlapp
             }
         }
     }
