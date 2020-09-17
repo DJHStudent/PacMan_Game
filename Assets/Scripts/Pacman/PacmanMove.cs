@@ -37,7 +37,6 @@ public class PacmanMove : MonoBehaviour
         }
         else
         {
-            Debug.Log("change direction");
             if (dir != 4)
                 dir++;
             else
