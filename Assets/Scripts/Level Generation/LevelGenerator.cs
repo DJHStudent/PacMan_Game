@@ -5,7 +5,6 @@ public class LevelGenerator : MonoBehaviour
     public GameObject[] levelSection;
     public GameObject mapSection;
     GameObject instance;
-    int currElement;
     public static int[] emptyChanges;
 
     int[,] levelMap =
@@ -57,17 +56,17 @@ public class LevelGenerator : MonoBehaviour
         {
             for (int j = 0; j < levelMap.GetLength(1); j++)
             {
-                currElement = levelMap[i, j];
+                int currElement = levelMap[i, j];
                 if (currElement != 0)
                 {
                     instance = Instantiate(levelSection[currElement], new Vector2(i, j), Quaternion.identity, mapSection.transform);
-                    instance.transform.rotation = determineRote(i, j);
+                    instance.transform.rotation = determineRote(i, j, currElement);
                 }
             }
         }
     }
    
-    Quaternion determineRote(int i, int j) //determines objects rotation based on type of piece it is
+    Quaternion determineRote(int i, int j, int currElement) //determines objects rotation based on type of piece it is
     {
         switch (currElement)
         {
@@ -82,37 +81,31 @@ public class LevelGenerator : MonoBehaviour
     {
         RaycastHit2D hit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1);
         if (hit)
-            if (hit.collider.gameObject.GetComponent<SpriteRenderer>().sprite == instance.GetComponent<SpriteRenderer>().sprite)//checks if left side is another wall
+            if (hit.collider.gameObject.GetComponent<SpriteRenderer>().sprite == instance.GetComponent<SpriteRenderer>().sprite) //checks if left side is another wall
                 return hit.collider.transform.rotation * Quaternion.identity; //if hiting another wall set rotation to that ones
             else
-                return Quaternion.Euler(0, 0, 90);//if hit map and not another wall must be horizontally rotated
+                return Quaternion.Euler(0, 0, 90); //if hit map and not another wall must be horizontally rotated
         else
             return Quaternion.identity; //if no wall hit must be vertical
     }
     Quaternion cornerRote(int i, int j)//determine the rotation of a corner piece
     {
-        //special cases where raycasts not most efficent way
-        if (j == levelMap.GetLength(1) - 1 && i == 7)
-            return Quaternion.Euler(0, 0, -90);
-        else if (i == 9 && j == 8)
-            return Quaternion.Euler(0, 0, 90);
-        else if (i == 10 && j == 8)
-            return Quaternion.Euler(0, 0, 0);
-        //cases based on raycast findings
-        else
-        {
-            //detect if another map piece is either to the left or below the current piece as during generation these only two pieces which matter for determing corner rotation
-            RaycastHit2D leftHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1);
-            RaycastHit2D downtHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.up, 1);
-            if (leftHit && downtHit)
-                return Quaternion.Euler(0, 0, 180);
-            else if (leftHit)
-                return Quaternion.Euler(0, 0, 90);
-            else if (downtHit)
+        //detect if another map piece is either to the left or below the current piece
+        RaycastHit2D leftHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1);
+        RaycastHit2D downtHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.up, 1);
+        if (leftHit && downtHit)
+            if (levelMap[i - 1, j] == 3) //check if left side is a inside corner
+                return Quaternion.Euler(0, 0, leftHit.collider.transform.rotation.eulerAngles.z - 90f);
+            else if (levelMap[i + 1, j] == 4 && levelMap[i, j - 1] == 4) //check if right and below is a inside wall
                 return Quaternion.Euler(0, 0, -90);
-            else return Quaternion.identity;
-        }
+            else if (levelMap[i - 1, j] == 4 && levelMap[i, j - 1] == 4 && (int)leftHit.transform.rotation.eulerAngles.z == (int)downtHit.transform.rotation.eulerAngles.z) //check if left and below is an inside wall and they both have the same rotation
+                return Quaternion.Euler(0, 0, 90);
+            else
+                return Quaternion.Euler(0, 0, 180);
+        else if (leftHit) //if just hit too the left
+            return Quaternion.Euler(0, 0, 90);
+        else if (downtHit) //if just hit too the right
+            return Quaternion.Euler(0, 0, -90);
+        else return Quaternion.identity;
     }
-
-  
 }
