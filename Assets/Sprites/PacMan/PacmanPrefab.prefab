@@ -9522,7 +9522,6 @@ GameObject:
   - component: {fileID: 2102156509}
   - component: {fileID: 2102156513}
   - component: {fileID: 2102156507}
-  - component: {fileID: 849265651}
   m_Layer: 0
   m_Name: PacmanPrefab
   m_TagString: Untagged
@@ -9751,15 +9750,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trail: {fileID: 307643241}
---- !u!114 &849265651
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 19088578821357987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e894d049483d9545a4b4955e41fbb0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
