@@ -8,7 +8,7 @@ public class LevelGenerator : MonoBehaviour
     int currElement;
     public static int[] emptyChanges;
 
-    public int[,] levelMap =
+    int[,] levelMap =
     {
         {1,2,2,2,2,2,2,2,2,2,2,2,2,7},
         {2,5,5,5,5,5,5,5,5,5,5,5,5,4},
@@ -113,4 +113,6 @@ public class LevelGenerator : MonoBehaviour
             else return Quaternion.identity;
         }
     }
+
+  
 }
