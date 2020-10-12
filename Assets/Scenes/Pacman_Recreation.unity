@@ -822,7 +822,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: e420252b698ba0f4fb8fe4b24b63660d, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 0984db928e95fde499a4a398bb272aa8, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -929,7 +929,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 584410450}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e11ecb8dea4ca8f48a5823f0e5e31c61, type: 3}
   m_Name: 
@@ -959,6 +959,9 @@ MonoBehaviour:
   - {fileID: 4338323962370237298, guid: 3e6afaa4d04974d498c993af9634d1bf, type: 3}
   - {fileID: 8440270810205229280, guid: 3e5a6487b11d0eb4a808484c9b5973ef, type: 3}
   mapSection: {fileID: 1308770647}
+  wall:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!114 &584410455
 MonoBehaviour:
   m_ObjectHideFlags: 0

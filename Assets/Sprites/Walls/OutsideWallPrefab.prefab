@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 2555667357064499730}
   - component: {fileID: 2555839918689953159}
   - component: {fileID: -3055984087529854451}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: OutsideWallPrefab
-  m_TagString: Wall
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

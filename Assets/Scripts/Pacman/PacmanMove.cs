@@ -5,9 +5,9 @@ using UnityEngine;
 public class PacmanMove : MonoBehaviour
 {
 
-    private Tween tween;
-    private float duration = 1;
-    private Animator animator;
+    Tween tween;
+    const float duration = 1;
+    Animator animator;
     int dir = 2;// 1 = up, 2 = left, 3 = down, 4 = right;
     void Start()
     {

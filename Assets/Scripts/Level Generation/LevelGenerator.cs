@@ -5,6 +5,7 @@ public class LevelGenerator : MonoBehaviour
     public GameObject[] levelSection;
     public GameObject mapSection;
     GameObject instance;
+    public LayerMask wall;
     int currElement;
     public static int[] emptyChanges;
 
@@ -80,7 +81,7 @@ public class LevelGenerator : MonoBehaviour
     }
     Quaternion wallRote(int i, int j) //determines rotation of the wall elements
     {
-        RaycastHit2D hit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1);
+        RaycastHit2D hit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1, wall);
         if (hit)
             if (hit.collider.gameObject.GetComponent<SpriteRenderer>().sprite == instance.GetComponent<SpriteRenderer>().sprite)//checks if left side is another wall
                 return hit.collider.transform.rotation * Quaternion.identity; //if hiting another wall set rotation to that ones
@@ -102,8 +103,8 @@ public class LevelGenerator : MonoBehaviour
         else
         {
             //detect if another map piece is either to the left or below the current piece as during generation these only two pieces which matter for determing corner rotation
-            RaycastHit2D leftHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1);
-            RaycastHit2D downtHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.up, 1);
+            RaycastHit2D leftHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.right, 1, wall);
+            RaycastHit2D downtHit = Physics2D.Raycast(new Vector2(i, j), -instance.transform.up, 1, wall);
             if (leftHit && downtHit)
                 return Quaternion.Euler(0, 0, 180);
             else if (leftHit)

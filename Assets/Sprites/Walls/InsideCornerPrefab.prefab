@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 3666461816960456126}
   - component: {fileID: 9134354818251495759}
   - component: {fileID: 1735344585854180627}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: InsideCornerPrefab
-  m_TagString: Wall
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
