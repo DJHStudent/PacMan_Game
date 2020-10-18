@@ -6,7 +6,6 @@ public class CherryController : MonoBehaviour
 {
     Tween tween;
     const float duration = 25f;
-    bool moving = false;
     Vector2 startPos, endPos;
 
     public GameObject cherryPrefab;
@@ -24,7 +23,6 @@ public class CherryController : MonoBehaviour
             changePos();
             if (Vector2.Distance(new Vector2(cherryInstance.transform.position.x, cherryInstance.transform.position.y), tween.EndPos) < 0.05f)
             {
-                moving = false;
                 Destroy(cherryInstance.gameObject);
             }
         }
@@ -36,7 +34,6 @@ public class CherryController : MonoBehaviour
         endPos = Camera.main.ViewportToWorldPoint(new Vector2(-0.1f, .5f));
         cherryInstance = Instantiate(cherryPrefab, startPos, Quaternion.identity);//make the cherry
         tween = new Tween(startPos, endPos, Time.time, duration);
-        moving = true; //tell update to check if finsihed movemenet or not
     }
     void changePos() //the actual movement of the cherry across the screen
     {

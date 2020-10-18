@@ -3,13 +3,17 @@
 public class DetermineSound : MonoBehaviour
 {
     AudioSource audioSource;
-    public AudioClip normalClip, scaredClip;
+    public AudioClip normalClip, scaredClip, deadClip;
     void Start()
     {
         audioSource = gameObject.GetComponent<AudioSource>();
     }
 
-
+    public void deadState()
+    {
+        audioSource.clip = deadClip;
+        audioSource.Play();
+    }
     public void scaredState()
     {
         audioSource.clip = scaredClip;
@@ -19,5 +23,10 @@ public class DetermineSound : MonoBehaviour
     {
         audioSource.clip = normalClip;
         audioSource.Play();
+    }
+
+    public bool isDeadState()
+    {
+        return audioSource.clip == deadClip;
     }
 }

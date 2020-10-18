@@ -20,14 +20,29 @@ public class AllGhosts : MonoBehaviour
 
     public void recovery()
     {
-        currState = (int)CurrState.recovery;
-        animator.SetTrigger("recovery");
+        if (currState != (int)CurrState.dead)
+        {
+            currState = (int)CurrState.recovery;
+            animator.SetTrigger("recovery");
+        }
+    }
+
+    public void dead()
+    {
+        currState = (int)CurrState.dead;
+        animator.SetTrigger("dead");
+        GameManager.setSound.deadState();
     }
     public void normal()
     {
-        currState = (int)CurrState.normal;
-        animator.SetTrigger("norm" + getDir());
-        GameManager.setSound.normalState();
+
+        if (currState != (int)CurrState.dead)
+        {
+            currState = (int)CurrState.normal;
+            animator.SetTrigger("norm" + getDir());
+            if (!GameManager.setSound.isDeadState())
+                GameManager.setSound.normalState();
+        }
     }
 
     string getDir()
