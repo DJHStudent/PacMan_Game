@@ -3,23 +3,21 @@
 public class DetermineSound : MonoBehaviour
 {
     AudioSource audioSource;
-    public AudioClip normalClip;
+    public AudioClip normalClip, scaredClip;
     void Start()
     {
         audioSource = gameObject.GetComponent<AudioSource>();
     }
 
-    void Update()
+
+    public void scaredState()
     {
-        PlayAudio(normalClip);
+        audioSource.clip = scaredClip;
+        audioSource.Play();
     }
-    void PlayAudio(AudioClip clip)
+    public void normalState()
     {
-        if(!audioSource.isPlaying)
-        {
-            audioSource.clip = normalClip;
-            audioSource.loop = true;
-            audioSource.Play();
-        }
+        audioSource.clip = normalClip;
+        audioSource.Play();
     }
 }

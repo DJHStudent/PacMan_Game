@@ -9526,7 +9526,7 @@ GameObject:
   - component: {fileID: 1717696167}
   m_Layer: 0
   m_Name: PacmanPrefab
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9740,9 +9740,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   eatPellet: {fileID: 8300000, guid: c541edadc984efd4a9aab8d72e04ef78, type: 3}
   pacWalk: {fileID: 8300000, guid: 52cd91ed8ed19724ea2f5da08d1e32e2, type: 3}
+  wallCollide: {fileID: 8300000, guid: 8908c60e7a122b7448813c4ccf574688, type: 3}
   ignorePellet:
     serializedVersion: 2
     m_Bits: 307
+  wallPartical: {fileID: 0}
 --- !u!50 &1717696166
 Rigidbody2D:
   serializedVersion: 4

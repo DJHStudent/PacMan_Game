@@ -5,31 +5,68 @@ using UnityEngine.XR.WSA.Input;
 
 public class PacStudentController : MonoBehaviour
 {
+
+    //issue if colliding with wall and move away in same frame cancels out the audio for wall collide
     Tween tween;
     const float duration = .9f;
     Animator animator;
     AudioSource pacAudio;
-    public AudioClip eatPellet, pacWalk;
+    public AudioClip eatPellet, pacWalk, wallCollide;
     public LayerMask ignorePellet;
+    public GameObject wallPartical;
+    [SerializeField]
+    Vector2 wallHitPoint, startPos;
 
     char lastInput = 'D', currentInput = 'D';
     void Start()
     {
         animator = GetComponent<Animator>();
         pacAudio = GetComponent<AudioSource>();
+        startPos = transform.position;
         getNextPos();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Pellet") || other.CompareTag("PowerPellet"))//if collide with pellet play the eatPellet audio
+        if (other.CompareTag("Pellet"))
         {
-            CancelInvoke();
-            pacAudio.loop = false;
-            pacAudio.clip = eatPellet;
-            pacAudio.Play();
-            Invoke("resetAudio", .5f); //after audio clip finished play the pacWalk audio again
+            hitPellet();
+            GameManager.pacStudentStats.addScore(10, other.gameObject);
         }
+        if (other.CompareTag("Cherry"))
+        {
+            GameManager.pacStudentStats.addScore(100, other.gameObject);
+        }
+        else if (other.CompareTag("PowerPellet"))//if collide with pellet play the eatPellet audio and add score etc...
+        {
+            hitPellet();
+            GameManager.ghost1.scared();
+            GameManager.ghost2.scared();
+            GameManager.ghost3.scared();
+            GameManager.ghost4.scared();
+            GameManager.pacStudentStats.startScared();
+            Destroy(other.gameObject);
+        }
+        else if (other.CompareTag("Ghost"))
+        {
+           AllGhosts ghostController = other.gameObject.GetComponent<AllGhosts>();
+            if (ghostController.currState == (int)AllGhosts.CurrState.normal)
+            {
+                GameManager.pacStudentStats.removeLife();
+                transform.position = startPos;
+                lastInput = clear;
+                currentInput = '';
+            }
+        }
+    }
+
+    void hitPellet()
+    {
+        CancelInvoke();
+        pacAudio.loop = false;
+        pacAudio.clip = eatPellet;
+        pacAudio.Play();
+        Invoke("resetAudio", .5f); //after audio clip finished play the pacWalk audio again
     }
 
     void resetAudio()//set aduio back to pacWalk
@@ -67,6 +104,7 @@ public class PacStudentController : MonoBehaviour
     {
         if (tween != null)
             transform.position = tween.EndPos; //ensures player at final position before moving to a new one
+        teleport();
         int startI = Mathf.RoundToInt(transform.position.x), startJ = Mathf.RoundToInt(transform.position.y); //get player current position as an int
         Vector2 nextPos = setNextPos(startI, startJ, lastInput); 
         if (lastInput != currentInput) //only nessesary do if the direction is actually changing
@@ -85,19 +123,30 @@ public class PacStudentController : MonoBehaviour
             if (animator.speed == 0) //continue if it was previouly stopped
             {
                 animator.speed = 1;
+                pacAudio.volume = 0.15f;
+                pacAudio.loop = true;
                 pacAudio.Play();
+                Invoke("resetAudio", pacAudio.clip.length);
             }
         }
-        else //if nextPos is a wall then stop the player
+        else if(animator.speed == 1) //only do if in last frame was moving //if nextPos is a wall then stop the player, change audio and play wall particals
         {
+            wallPartical.transform.position = wallHitPoint;
+            wallPartical.GetComponent<ParticleSystem>().Play();
             animator.speed = 0;
-            pacAudio.Pause();
+            pacAudio.clip = wallCollide;
+            pacAudio.volume = 1f;
+            pacAudio.loop = false;
+            pacAudio.Play();
         }
     }
 
-    bool nextPosWall(Vector2 nextPos) //checks if the next position the player is moving too is a wall or not
+    bool nextPosWall(Vector2 nextPos) //checks if the next position the player is moving too is a wall
     {
-        return Physics2D.Raycast(transform.position, nextPos - new Vector2(transform.position.x, transform.position.y), 1, ignorePellet);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, nextPos - new Vector2(transform.position.x, transform.position.y), 1, ignorePellet);
+        if (hit)
+           wallHitPoint = hit.point; //get the point that the collision occured with the wall
+        return hit;
     }
 
     Vector2 setNextPos(int startI, int startJ, char input) //determine the next position the player will be moved too based on the input key given
@@ -108,6 +157,22 @@ public class PacStudentController : MonoBehaviour
             case 'S': return new Vector2(startI, startJ - 1);
             case 'W': return new Vector2(startI, startJ + 1);
             default: return new Vector2(startI + 1, startJ);
+        }
+    }
+
+    void teleport() //when at portal pos move pacStudent to other side of map
+    {
+        if (transform.position.x <= -14)
+        {
+            Vector2 pos = transform.position;
+            pos.x = 13;
+            transform.position = pos;
+        }   
+        else if(transform.position.x >= 13)
+        {
+            Vector2 pos = transform.position;
+            pos.x = -14;
+            transform.position = pos;
         }
     }
 
