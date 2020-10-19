@@ -7,6 +7,7 @@ public class LevelGenerator : MonoBehaviour
     GameObject instance;
     public LayerMask wall;
     int currElement;
+    public int pelletAmount = 0;
     public static int[] emptyChanges;
 
     public int[,] levelMap =
@@ -62,6 +63,8 @@ public class LevelGenerator : MonoBehaviour
                 if (currElement != 0)
                 {
                     instance = Instantiate(levelSection[currElement], new Vector2(i, j), Quaternion.identity, mapSection.transform);
+                    if (currElement == 6 || currElement == 5)
+                        pelletAmount++;
                     instance.transform.rotation = determineRote(i, j);
                 }
             }

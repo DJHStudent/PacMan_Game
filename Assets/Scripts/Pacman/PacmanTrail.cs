@@ -8,9 +8,12 @@ public class PacmanTrail : MonoBehaviour
     }
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.A)|| Input.GetKeyDown(KeyCode.W)|| Input.GetKeyDown(KeyCode.D)|| Input.GetKeyDown(KeyCode.S))
+        if (!GameManager.level1UIManager.statsManager.paused)
         {
-            Invoke("wait", .19f);
+            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.S))
+            {
+                Invoke("wait", .19f);
+            }
         }
     }
     void wait()

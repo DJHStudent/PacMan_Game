@@ -15,7 +15,7 @@ public class AllGhosts : MonoBehaviour
     public void scared() {
         currState = (int)CurrState.scared;
         animator.SetTrigger("scared" + getDir());
-        GameManager.setSound.scaredState();
+        GameManager.audioManager.scaredState();
     }
 
     public void recovery()
@@ -31,7 +31,7 @@ public class AllGhosts : MonoBehaviour
     {
         currState = (int)CurrState.dead;
         animator.SetTrigger("dead");
-        GameManager.setSound.deadState();
+        GameManager.audioManager.deadState();
     }
     public void normal()
     {
@@ -40,8 +40,8 @@ public class AllGhosts : MonoBehaviour
         {
             currState = (int)CurrState.normal;
             animator.SetTrigger("norm" + getDir());
-            if (!GameManager.setSound.isDeadState())
-                GameManager.setSound.normalState();
+            if (!GameManager.audioManager.isDeadState())
+                GameManager.audioManager.normalState();
         }
     }
 
