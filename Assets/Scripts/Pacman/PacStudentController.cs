@@ -51,8 +51,8 @@ public class PacStudentController : MonoBehaviour
             }
             else if (other.CompareTag("Ghost"))
             {
-                AllGhosts ghostController = other.gameObject.GetComponent<AllGhosts>();
-                if (ghostController.currState == (int)AllGhosts.CurrState.normal) //all code works execpt when pacman dies
+                GhostController ghostController = other.gameObject.GetComponent<GhostController>();
+                if (ghostController.currState == (int)GhostController.CurrState.normal) //all code works execpt when pacman dies
                 {
                     GameManager.level1UIManager.statsManager.removeLife();
                     deathPartical.Play();
@@ -61,10 +61,10 @@ public class PacStudentController : MonoBehaviour
                     pause();
                     tween = null;
                 }
-                else if (ghostController.currState == (int)AllGhosts.CurrState.scared || ghostController.currState == (int)AllGhosts.CurrState.recovery)
+                else if (ghostController.currState == (int)GhostController.CurrState.scared || ghostController.currState == (int)GhostController.CurrState.recovery)
                 {
                     GameManager.level1UIManager.statsManager.addScore(300, null);
-                    other.GetComponent<AllGhosts>().dead();
+                    other.GetComponent<GhostController>().dead();
                 }
             }
         }

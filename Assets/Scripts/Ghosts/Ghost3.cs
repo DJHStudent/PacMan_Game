@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Ghost3 : AllGhosts
+public class Ghost3 : GhostController
 {
     // Start is called before the first frame update
     void Start()
