@@ -51,8 +51,11 @@ public class AudioManager : MonoBehaviour
     //background audio
     public void deadState()
     {
-        backgroundAudio.clip = deadClip;
-        backgroundAudio.Play();
+        if (!isDeadState())
+        {
+            backgroundAudio.clip = deadClip;
+            backgroundAudio.Play();
+        }
     }
     public void scaredState()
     {

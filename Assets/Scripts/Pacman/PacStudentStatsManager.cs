@@ -106,9 +106,14 @@ public class PacStudentStatsManager : MonoBehaviour
         {
             //pause everything
             paused = true;
-            GameManager.pacStudentController.pause();
+            GameManager.pacStudentController.pause();            
+            GameManager.ghost1.pause();
+            GameManager.ghost2.pause();
+            GameManager.ghost3.pause();
+            GameManager.ghost4.pause();
             GameManager.level1UIManager.setStartTimer("Game Over");
             GameManager.level1UIManager.startTimerVisable(true);
+
             Invoke("changeScene", 3);
         }
     }

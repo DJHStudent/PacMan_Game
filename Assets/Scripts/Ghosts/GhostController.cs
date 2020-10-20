@@ -23,20 +23,21 @@ public class GhostController : MonoBehaviour
     float duration = .7f;//.9f;
     enum CurrDir { up, left, right, down };
     public enum CurrState { normal, scared, recovery, dead };
-    public int currDir = (int)CurrDir.up;
+    public int currDir = (int)CurrDir.down;
     public int currState = (int)CurrState.normal;
     Vector2 spawnPos, leftBasePos;
     public Vector2[] exitSpawnPos;
     public GameObject playerPos;
     Vector2[] directions = { Vector2.up, Vector2.left, Vector2.right, Vector2.down};
-    bool inSpawn = true;
+   public bool inSpawn;
     public bool ghost1, ghost2, ghost3, ghost4;
     public LayerMask ignorePellet, spawnLayer;
 
     public void scared() {
         currState = (int)CurrState.scared;
         animator.SetTrigger("scared" + getDir());
-        GameManager.audioManager.scaredState();
+        if (!GameManager.audioManager.isDeadState())
+            GameManager.audioManager.scaredState();
     }
 
     public void recovery()
@@ -85,6 +86,11 @@ public class GhostController : MonoBehaviour
             ignorePellet = ignorePellet | (1 << 20);
         }
     }
+    public void pause()
+    {
+        animator.speed = 0;
+        tween = null;
+    }
     //GhostAI
     private void Awake()
     {
@@ -122,7 +128,48 @@ public class GhostController : MonoBehaviour
             inSpawn = false;
         if (tween != null)
             transform.position = tween.EndPos;
+        if (currState == (int)CurrState.dead && Vector2.Distance(new Vector2(transform.position.x, transform.position.y), spawnPos) < 0.05f)
+        {
+            resetGhost();
+            inSpawn = true;
+        }
         tween = new Tween(transform.position, getNextPos(), Time.time, duration);
+    }
+
+    void resetGhost()//if ghost back in spawn after being eaten
+    {
+        GhostController[] allGhostStates = { GameManager.ghost1, GameManager.ghost2, GameManager.ghost3, GameManager.ghost4};
+        int deadGhosts = 0;
+        bool reset = false;//once ghost reset once don't do it again
+        foreach (GhostController ghostState in allGhostStates) //check the current state of the other ghosts to see if they match and change accordingly
+        {
+            if (ghostState.gameObject != this.gameObject && ghostState.currState == (int)CurrState.dead) //not current ghost
+                deadGhosts++;
+            if (!reset && ghostState.currState == (int)CurrState.scared)
+            {
+                scared();
+                reset = true;
+            }
+            else if (!reset && ghostState.currState == (int)CurrState.recovery)
+            {
+                currState = (int)CurrState.recovery;
+                recovery();
+                reset = true;
+            }
+            else if (!reset && ghostState.currState == (int)CurrState.normal)
+            {
+                currState = (int)CurrState.normal;
+                normal();
+                reset = true;
+            }
+        }
+        if(deadGhosts == 0)//if no other ghosts are dead reset the music as well(too the approprate state)
+        {
+            if (currState == (int)CurrState.normal)
+                GameManager.audioManager.normalState();
+            else
+                GameManager.audioManager.scaredState();
+        }
     }
 
     Vector2 getNextPos()
@@ -140,9 +187,19 @@ public class GhostController : MonoBehaviour
             duration = 5f;
             return spawnPos;
         }
+        else if (ghost1 || currState == (int)CurrState.scared || currState == (int)CurrState.recovery)
+        {
+            List<nextPos> validPos = ghost1NextPos(playerPos.transform.position);
+            return nextPosInfo(validPos);
+        }
         else if(ghost3)
         {
-            List<nextPos> validPos = ghost3NextPos(playerPos.transform.position);
+            List<nextPos> validPos = ghost3NextPos();
+            return nextPosInfo(validPos);
+        }
+        else if (ghost4)
+        {
+            List<nextPos> validPos = ghost4NextPos();
             return nextPosInfo(validPos);
         }
         else
@@ -165,6 +222,34 @@ public class GhostController : MonoBehaviour
         }
         return validPos[rand].pos;
     }
+    List<nextPos> ghost1NextPos(Vector2 target)
+    {
+        Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
+        List<nextPos> nextPos = new List<nextPos>();//maybey change this here to a class with the nessesary info for directions as well as animation stuff
+        //add wall sensing later
+        if (isDirSafe((int)CurrDir.up) && isFurther(currPos, currPos + directions[(int)CurrDir.up], target)) //if not backstepping && actually further to target then next pos Valid
+            nextPos.Add(addDir((int)CurrDir.up, currPos));
+
+        if (isDirSafe((int)CurrDir.left) && isFurther(currPos, currPos + directions[(int)CurrDir.left], target))
+            nextPos.Add(addDir((int)CurrDir.left, currPos));
+
+        if (isDirSafe((int)CurrDir.right) && isFurther(currPos, currPos + directions[(int)CurrDir.right], target))
+            nextPos.Add(addDir((int)CurrDir.right, currPos));
+
+        if (isDirSafe((int)CurrDir.down) && isFurther(currPos, currPos + directions[(int)CurrDir.down], target))
+            nextPos.Add(addDir((int)CurrDir.down, currPos));
+        if (nextPos.Count == 0) //if no valid direction which is further or == then choose a random valid direction
+        {
+            nextPos = ghost3NextPos();
+        }
+
+        return nextPos;
+    }
+    bool isFurther(Vector2 currPos, Vector2 nextPos, Vector2 target)
+    {
+        float currDist = Vector2.Distance(currPos, target);
+        return Vector2.Distance(nextPos, target) >= currDist;
+    }
     List<nextPos> ghost2NextPos(Vector2 target)
     {
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
@@ -183,23 +268,20 @@ public class GhostController : MonoBehaviour
             nextPos.Add(addDir((int)CurrDir.down, currPos));
         if (nextPos.Count == 0) //if no valid direction which is closer or == then choose a random valid direction
         {
-            nextPos = ghost3NextPos(target);
+            nextPos = ghost3NextPos();
         }
 
         return nextPos;
     }
     bool isCloser(Vector2 currPos, Vector2 nextPos, Vector2 target)
     {
-        float xDistToTarget = Mathf.Abs(currPos.x - target.x);
-        float yDistToTarget = Mathf.Abs(currPos.y - target.y);
         float currDist = Vector2.Distance(currPos, target);
         return Vector2.Distance(nextPos, target) <= currDist;
     }
 
-    List<nextPos> ghost3NextPos(Vector2 target)
+    List<nextPos> ghost3NextPos()
     {
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
-        float distToTarget = Vector2.Distance(currPos, target);
         List<nextPos> nextPos = new List<nextPos>();//maybey change this here to a class with the nessesary info for directions as well as animation stuff
         //add wall sensing later
         if (isDirSafe((int)CurrDir.up)) //if not backstepping && actually closer to target then next pos Valid
@@ -216,6 +298,60 @@ public class GhostController : MonoBehaviour
         if (nextPos.Count == 0)//only backtrack if no other direction is possible to be valid
         {
             nextPos.Add(new nextPos(getOppDir(), currPos - directions[currDir]));
+        }
+
+        return nextPos;
+    }
+
+    List<nextPos> ghost4NextPos()
+    {
+        Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
+        List<nextPos> nextPos = new List<nextPos>();
+        //if down check right is wall
+        //if right check up is wall
+        //if left check down is wall
+        //if up check left is wall
+        if (currDir == (int)CurrDir.down && !nextPosWall(directions[(int)CurrDir.down]) && nextPosWall(directions[(int)CurrDir.right]))
+            nextPos.Add(addDir((int)CurrDir.down, currPos));
+        else if (currDir == (int)CurrDir.right && !nextPosWall(directions[(int)CurrDir.right]) && nextPosWall(directions[(int)CurrDir.up]))
+            nextPos.Add(addDir((int)CurrDir.right, currPos));
+        else if (currDir == (int)CurrDir.left && !nextPosWall(directions[(int)CurrDir.left]) && nextPosWall(directions[(int)CurrDir.down]))
+            nextPos.Add(addDir((int)CurrDir.left, currPos));
+        else if (currDir == (int)CurrDir.up && !nextPosWall(directions[(int)CurrDir.up]) && nextPosWall(directions[(int)CurrDir.left]))
+            nextPos.Add(addDir((int)CurrDir.up, currPos));
+
+
+        else if (nextPosWall(directions[(int)CurrDir.right]) && nextPosWall(directions[(int)CurrDir.up]) && nextPosWall(directions[(int)CurrDir.down]))
+            nextPos.Add(addDir((int)CurrDir.left, currPos));
+        else if (nextPosWall(directions[(int)CurrDir.left]) && nextPosWall(directions[(int)CurrDir.up]) && nextPosWall(directions[(int)CurrDir.down]))
+            nextPos.Add(addDir((int)CurrDir.right, currPos));
+        else if (currDir == (int)CurrDir.down)// && !nextPosWall(directions[(int)CurrDir.down]) && nextPosWall(directions[(int)CurrDir.right]))
+        {
+            if (nextPosWall(directions[(int)CurrDir.right]))
+                nextPos.Add(addDir((int)CurrDir.left, currPos));
+            else
+                nextPos.Add(addDir((int)CurrDir.right, currPos));
+        }
+        else if (currDir == (int)CurrDir.right)// && !nextPosWall(directions[(int)CurrDir.right]) && nextPosWall(directions[(int)CurrDir.up]))
+        {
+            if (nextPosWall(directions[(int)CurrDir.up]))
+                nextPos.Add(addDir((int)CurrDir.down, currPos));
+            else
+                nextPos.Add(addDir((int)CurrDir.up, currPos));
+        }
+        else if (currDir == (int)CurrDir.left)// && !nextPosWall(directions[(int)CurrDir.left]) && nextPosWall(directions[(int)CurrDir.down]))
+        {
+            if (nextPosWall(directions[(int)CurrDir.down]))
+                nextPos.Add(addDir((int)CurrDir.up, currPos));
+            else
+                nextPos.Add(addDir((int)CurrDir.down, currPos));
+        }
+        else if (currDir == (int)CurrDir.up)// && !nextPosWall(directions[(int)CurrDir.up]) && nextPosWall(directions[(int)CurrDir.left]))
+        {
+            if (nextPosWall(directions[(int)CurrDir.left]))
+                nextPos.Add(addDir((int)CurrDir.right, currPos));
+            else
+                nextPos.Add(addDir((int)CurrDir.left, currPos));
         }
 
         return nextPos;
@@ -253,6 +389,7 @@ public class GhostController : MonoBehaviour
     }
     void changePos() //move the ghost to the specified location
     {
+        if (!GameManager.level1UIManager.statsManager.paused)
         {
             float timeFraction = (Time.time - tween.StartTime) / tween.Duration;
             transform.position = Vector2.Lerp(tween.StartPos, tween.EndPos, timeFraction);
