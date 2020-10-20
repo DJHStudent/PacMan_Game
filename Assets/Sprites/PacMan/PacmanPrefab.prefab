@@ -664,7 +664,7 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     randomizeRotationDirection: 0
-    maxNumParticles: 14
+    maxNumParticles: 24
     size3D: 0
     rotation3D: 0
     gravityModifier:
@@ -5418,7 +5418,7 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     randomizeRotationDirection: 0
-    maxNumParticles: 14
+    maxNumParticles: 24
     size3D: 0
     rotation3D: 0
     gravityModifier:
@@ -9524,7 +9524,7 @@ GameObject:
   - component: {fileID: 2059890305228934238}
   - component: {fileID: 1717696166}
   - component: {fileID: 1717696167}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: PacmanPrefab
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -9631,7 +9631,7 @@ AudioSource:
   m_PlayOnAwake: 0
   m_Volume: 0.15
   m_Pitch: 0.85
-  Loop: 1
+  Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -9738,15 +9738,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af4eef09b7a66be46a60ff81d0505b39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eatPellet: {fileID: 8300000, guid: c541edadc984efd4a9aab8d72e04ef78, type: 3}
-  pacWalk: {fileID: 8300000, guid: 52cd91ed8ed19724ea2f5da08d1e32e2, type: 3}
-  wallCollide: {fileID: 8300000, guid: 8908c60e7a122b7448813c4ccf574688, type: 3}
+  animator: {fileID: 0}
   ignorePellet:
     serializedVersion: 2
     m_Bits: 307
   wallPartical: {fileID: 0}
-  wallHitPoint: {x: 0, y: 0}
-  startPos: {x: 0, y: 0}
+  deathPartical: {fileID: 0}
 --- !u!50 &1717696166
 Rigidbody2D:
   serializedVersion: 4

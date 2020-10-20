@@ -32,6 +32,10 @@ public class PacStudentStatsManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(1);
         GameManager.level1UIManager.startTimerVisable(false);
         paused = false;
+        GameManager.ghost1.initialize();
+        GameManager.ghost2.initialize();
+        GameManager.ghost3.initialize();
+        GameManager.ghost4.initialize();
         levelStartTime = Time.timeSinceLevelLoad;
         GameManager.audioManager.normalState();
     }

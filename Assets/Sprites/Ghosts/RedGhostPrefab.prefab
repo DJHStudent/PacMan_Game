@@ -264,7 +264,7 @@ GameObject:
   - component: {fileID: 1452661837}
   - component: {fileID: 1452661838}
   - component: {fileID: 268442972}
-  - component: {fileID: 268442971}
+  - component: {fileID: 5978284810243272953}
   m_Layer: 2
   m_Name: RedGhostPrefab
   m_TagString: Ghost
@@ -325,7 +325,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 2648216430336716480, guid: c1a7d8ddf50b5b846b7268fe87321dfd,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -5105,7 +5105,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &268442971
+--- !u!114 &5978284810243272953
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5114,8 +5114,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 7406623841520494048}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16d18741f574ac84996b896bf2a8976a, type: 3}
+  m_Script: {fileID: 11500000, guid: aedf06012793a524fbc1f6d9510766d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
+  currDir: 0
   currState: 0
+  exitSpawnPos:
+  - {x: 0, y: 4}
+  - {x: -1, y: 4}
+  playerPos: {fileID: 0}
+  ghost1: 0
+  ghost2: 1
+  ghost3: 0
+  ghost4: 0
+  ignorePellet:
+    serializedVersion: 2
+    m_Bits: 819
+  spawnLayer:
+    serializedVersion: 2
+    m_Bits: 307

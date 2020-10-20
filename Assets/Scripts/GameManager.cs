@@ -9,10 +9,10 @@ public class GameManager : MonoBehaviour
     public static AudioManager audioManager;
     public static LevelGenerator levelGenerator;
     public static SaveManager saveManager;
-    public static Ghost1 ghost1;
-    public static Ghost2 ghost2;
-    public static Ghost3 ghost3;
-    public static Ghost4 ghost4;
+    public static GhostController ghost1;
+    public static GhostController ghost2;
+    public static GhostController ghost3;
+    public static GhostController ghost4;
     void Awake()
     {
         pacStudentController = GameObject.FindGameObjectWithTag("Player").GetComponent<PacStudentController>();
@@ -20,9 +20,9 @@ public class GameManager : MonoBehaviour
         audioManager = GetComponent<AudioManager>();
         levelGenerator = GetComponent<LevelGenerator>();
         saveManager = GameObject.Find("SaveManager").GetComponent<SaveManager>();
-        ghost1 = GameObject.Find("BlueGhost").GetComponent<Ghost1>();
-        ghost2 = GameObject.Find("OrangeGhost").GetComponent<Ghost2>();
-        ghost3 = GameObject.Find("PinkGhost").GetComponent<Ghost3>();
-        ghost4 = GameObject.Find("RedGhost").GetComponent<Ghost4>();
+        ghost1 = GameObject.Find("BlueGhost").GetComponent<GhostController>();
+        ghost2 = GameObject.Find("OrangeGhost").GetComponent<GhostController>();
+        ghost3 = GameObject.Find("PinkGhost").GetComponent<GhostController>();
+        ghost4 = GameObject.Find("RedGhost").GetComponent<GhostController>();
     }
 }

@@ -264,7 +264,7 @@ GameObject:
   - component: {fileID: 249169753}
   - component: {fileID: 249169754}
   - component: {fileID: 1174113315}
-  - component: {fileID: 1174113314}
+  - component: {fileID: 8656843743571500636}
   m_Layer: 2
   m_Name: OrangeGhostPrefab
   m_TagString: Ghost
@@ -325,7 +325,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 5915549860818637926, guid: 890af5abb062f964eb15f8b3c25aa0bb,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -5105,7 +5105,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &1174113314
+--- !u!114 &8656843743571500636
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5114,8 +5114,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 4889424431929276061}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 064b3e1cd72327149be985e385aefc62, type: 3}
+  m_Script: {fileID: 11500000, guid: aedf06012793a524fbc1f6d9510766d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
+  currDir: 0
   currState: 0
+  exitSpawnPos:
+  - {x: 0, y: 4}
+  - {x: -1, y: 4}
+  playerPos: {fileID: 0}
+  ghost1: 0
+  ghost2: 1
+  ghost3: 0
+  ghost4: 0
+  ignorePellet:
+    serializedVersion: 2
+    m_Bits: 819
+  spawnLayer:
+    serializedVersion: 2
+    m_Bits: 307
