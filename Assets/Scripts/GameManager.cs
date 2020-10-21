@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         pacStudentController = GameObject.FindGameObjectWithTag("Player").GetComponent<PacStudentController>();
+        Debug.Log(pacStudentController);
         level1UIManager = GetComponent<Level1UIManager>();
         audioManager = GetComponent<AudioManager>();
         levelGenerator = GetComponent<LevelGenerator>();
@@ -24,5 +25,6 @@ public class GameManager : MonoBehaviour
         ghost2 = GameObject.Find("OrangeGhost").GetComponent<GhostController>();
         ghost3 = GameObject.Find("PinkGhost").GetComponent<GhostController>();
         ghost4 = GameObject.Find("RedGhost").GetComponent<GhostController>();
+        audioManager.initialize();
     }
 }

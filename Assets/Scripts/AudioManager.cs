@@ -5,7 +5,7 @@ public class AudioManager : MonoBehaviour
     AudioSource backgroundAudio, pacStudentAudio;
     public AudioClip normalClip, scaredClip, deadClip;
     public AudioClip eatPellet, pacWalk, wallCollide;
-    void Start()
+    public void initialize()
     {
         backgroundAudio = gameObject.GetComponent<AudioSource>();
         pacStudentAudio = GameManager.pacStudentController.gameObject.GetComponent<AudioSource>();
@@ -13,6 +13,7 @@ public class AudioManager : MonoBehaviour
     //pacStudent audio
     public void pause()
     {
+        Debug.Log(pacStudentAudio);
         pacStudentAudio.Stop();
     }
     public void hitWall()
