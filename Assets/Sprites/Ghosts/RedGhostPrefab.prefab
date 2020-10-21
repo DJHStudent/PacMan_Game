@@ -5124,13 +5124,16 @@ MonoBehaviour:
   - {x: 0, y: 4}
   - {x: -1, y: 4}
   playerPos: {fileID: 0}
-  ghost1: 1
+  ghost1: 0
   ghost2: 0
   ghost3: 0
-  ghost4: 0
+  ghost4: 1
   ignorePellet:
     serializedVersion: 2
-    m_Bits: 819
+    m_Bits: 1843
   spawnLayer:
     serializedVersion: 2
-    m_Bits: 307
+    m_Bits: 1331
+  outerWalls:
+    serializedVersion: 2
+    m_Bits: 1024

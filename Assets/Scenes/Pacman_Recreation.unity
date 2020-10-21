@@ -818,8 +818,9 @@ MonoBehaviour:
   mapSection: {fileID: 1308770647}
   wall:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 1280
   pelletAmount: 0
+  wayPointStart: {fileID: 0}
 --- !u!114 &584410455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12005,11 +12006,6 @@ PrefabInstance:
       propertyPath: deathPartical
       value: 
       objectReference: {fileID: 1261837134}
-    - target: {fileID: 2059890305228934238, guid: a4f018d9869386e418743be65d762c4c,
-        type: 3}
-      propertyPath: ignorePellet.m_Bits
-      value: 307
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a4f018d9869386e418743be65d762c4c, type: 3}
 --- !u!1001 &3450750248473777665
@@ -12169,30 +12165,15 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 519420031}
-    - target: {fileID: 5978284810243272953, guid: 71850ffac17a5074d86f93dc7f162474,
-        type: 3}
-      propertyPath: inSpawn
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5978284810243272953, guid: 71850ffac17a5074d86f93dc7f162474,
-        type: 3}
-      propertyPath: ghost1
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5978284810243272953, guid: 71850ffac17a5074d86f93dc7f162474,
-        type: 3}
-      propertyPath: ghost4
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7406623841520494045, guid: 71850ffac17a5074d86f93dc7f162474,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -13
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 7406623841520494045, guid: 71850ffac17a5074d86f93dc7f162474,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 15
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7406623841520494045, guid: 71850ffac17a5074d86f93dc7f162474,
         type: 3}

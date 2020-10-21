@@ -17,7 +17,7 @@ public class nextPos
 
 public class GhostController : MonoBehaviour
 {
-
+    //implement A* if time
     public Animator animator;
     Tween tween;
     float duration = .7f;//.9f;
@@ -29,9 +29,11 @@ public class GhostController : MonoBehaviour
     public Vector2[] exitSpawnPos;
     public GameObject playerPos;
     Vector2[] directions = { Vector2.up, Vector2.left, Vector2.right, Vector2.down};
-   public bool inSpawn;
+    bool inSpawn = true;
     public bool ghost1, ghost2, ghost3, ghost4;
-    public LayerMask ignorePellet, spawnLayer;
+    [SerializeField]
+    GameObject ghost4nextLocation; //get the next waypoint pos for ghost 4
+    public LayerMask ignorePellet, spawnLayer, outerWalls;
 
     public void scared() {
         currState = (int)CurrState.scared;
@@ -102,6 +104,7 @@ public class GhostController : MonoBehaviour
         spawnPos = transform.position;
         playerPos = GameManager.pacStudentController.gameObject;
         animator.speed = 1;
+        ghost4nextLocation = GameManager.levelGenerator.wayPointStart;
         setExitPos();
         setNextPos();
     }
@@ -270,7 +273,6 @@ public class GhostController : MonoBehaviour
         {
             nextPos = ghost3NextPos();
         }
-
         return nextPos;
     }
     bool isCloser(Vector2 currPos, Vector2 nextPos, Vector2 target)
@@ -307,52 +309,26 @@ public class GhostController : MonoBehaviour
     {
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
         List<nextPos> nextPos = new List<nextPos>();
-        //if down check right is wall
-        //if right check up is wall
-        //if left check down is wall
-        //if up check left is wall
-        if (currDir == (int)CurrDir.down && !nextPosWall(directions[(int)CurrDir.down]) && nextPosWall(directions[(int)CurrDir.right]))
-            nextPos.Add(addDir((int)CurrDir.down, currPos));
-        else if (currDir == (int)CurrDir.right && !nextPosWall(directions[(int)CurrDir.right]) && nextPosWall(directions[(int)CurrDir.up]))
-            nextPos.Add(addDir((int)CurrDir.right, currPos));
-        else if (currDir == (int)CurrDir.left && !nextPosWall(directions[(int)CurrDir.left]) && nextPosWall(directions[(int)CurrDir.down]))
-            nextPos.Add(addDir((int)CurrDir.left, currPos));
-        else if (currDir == (int)CurrDir.up && !nextPosWall(directions[(int)CurrDir.up]) && nextPosWall(directions[(int)CurrDir.left]))
-            nextPos.Add(addDir((int)CurrDir.up, currPos));
+        if (ghost4nextLocation != null && Vector2.Distance(currPos, ghost4nextLocation.transform.position) > 2.05f)
+        {
+            nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+        }
+        else
+        {
 
+            {
+                ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
+                //////////if (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
+                //////////    ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
+                //////////if (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
+                while (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
+                    ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
+              //  Debug.Log("made it to location" + ghost4nextLocation.transform.localPosition);
+            }
+            nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
 
-        else if (nextPosWall(directions[(int)CurrDir.right]) && nextPosWall(directions[(int)CurrDir.up]) && nextPosWall(directions[(int)CurrDir.down]))
-            nextPos.Add(addDir((int)CurrDir.left, currPos));
-        else if (nextPosWall(directions[(int)CurrDir.left]) && nextPosWall(directions[(int)CurrDir.up]) && nextPosWall(directions[(int)CurrDir.down]))
-            nextPos.Add(addDir((int)CurrDir.right, currPos));
-        else if (currDir == (int)CurrDir.down)// && !nextPosWall(directions[(int)CurrDir.down]) && nextPosWall(directions[(int)CurrDir.right]))
-        {
-            if (nextPosWall(directions[(int)CurrDir.right]))
-                nextPos.Add(addDir((int)CurrDir.left, currPos));
-            else
-                nextPos.Add(addDir((int)CurrDir.right, currPos));
         }
-        else if (currDir == (int)CurrDir.right)// && !nextPosWall(directions[(int)CurrDir.right]) && nextPosWall(directions[(int)CurrDir.up]))
-        {
-            if (nextPosWall(directions[(int)CurrDir.up]))
-                nextPos.Add(addDir((int)CurrDir.down, currPos));
-            else
-                nextPos.Add(addDir((int)CurrDir.up, currPos));
-        }
-        else if (currDir == (int)CurrDir.left)// && !nextPosWall(directions[(int)CurrDir.left]) && nextPosWall(directions[(int)CurrDir.down]))
-        {
-            if (nextPosWall(directions[(int)CurrDir.down]))
-                nextPos.Add(addDir((int)CurrDir.up, currPos));
-            else
-                nextPos.Add(addDir((int)CurrDir.down, currPos));
-        }
-        else if (currDir == (int)CurrDir.up)// && !nextPosWall(directions[(int)CurrDir.up]) && nextPosWall(directions[(int)CurrDir.left]))
-        {
-            if (nextPosWall(directions[(int)CurrDir.left]))
-                nextPos.Add(addDir((int)CurrDir.right, currPos));
-            else
-                nextPos.Add(addDir((int)CurrDir.left, currPos));
-        }
+        //check all 4 directions
 
         return nextPos;
     }

@@ -9741,7 +9741,7 @@ MonoBehaviour:
   animator: {fileID: 0}
   ignorePellet:
     serializedVersion: 2
-    m_Bits: 307
+    m_Bits: 1843
   wallPartical: {fileID: 0}
   deathPartical: {fileID: 0}
 --- !u!50 &1717696166

@@ -21,8 +21,8 @@ public class SaveManager : MonoBehaviour
             float time = PlayerPrefs.GetFloat(saveTime);
             string mins = ((int)time / 60).ToString("00:");
             string secs = (time % 60).ToString("00.00");
-            uiManager.timeTxt.text = "Time: " + mins + secs.Replace('.', ':');
-            uiManager.scoreTxt.text = "Score: " + PlayerPrefs.GetInt(saveScore);
+            uiManager.timeTxt.text = "Time:\n" + mins + secs.Replace('.', ':');
+            uiManager.scoreTxt.text = "Score:\n" + PlayerPrefs.GetInt(saveScore);
         }
     }
 
@@ -30,9 +30,12 @@ public class SaveManager : MonoBehaviour
     {
         int score = GameManager.level1UIManager.statsManager.score;
         float currTime = Time.timeSinceLevelLoad - GameManager.level1UIManager.statsManager.levelStartTime;
-        if (!PlayerPrefs.HasKey(saveScore) ||score > PlayerPrefs.GetInt(saveScore))
+        if (!PlayerPrefs.HasKey(saveScore) || score > PlayerPrefs.GetInt(saveScore))
+        {
             PlayerPrefs.SetInt(saveScore, score);
-        if (!PlayerPrefs.HasKey(saveTime) || currTime < PlayerPrefs.GetFloat(saveTime))
+            PlayerPrefs.SetFloat(saveTime, currTime);
+        }
+        if (!PlayerPrefs.HasKey(saveTime) || score >= PlayerPrefs.GetInt(saveScore) && currTime < PlayerPrefs.GetFloat(saveTime))
             PlayerPrefs.SetFloat(saveTime, currTime);
     }
     // Update is called once per frame

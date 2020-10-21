@@ -5130,7 +5130,10 @@ MonoBehaviour:
   ghost4: 0
   ignorePellet:
     serializedVersion: 2
-    m_Bits: 819
+    m_Bits: 1843
   spawnLayer:
     serializedVersion: 2
-    m_Bits: 307
+    m_Bits: 1331
+  outerWalls:
+    serializedVersion: 2
+    m_Bits: 1024
