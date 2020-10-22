@@ -18,12 +18,13 @@ public class prevPos
 }
 //probably add case where after changed direction just ensure move in that direction first so get three wide gaps
 //max 93 by 93 before too much
-//min height is 18 min with is 26 + whatever teloWidth is
+//min height is 18 min with is 28
 public class RandomSizeGenerator : MonoBehaviour
 {
     public int width, height;
+    bool pathStarted = false;
     public int[,] map;
-    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner };
+    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner, teloBlocker };
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
     Vector2 currPos, currDir, lastDir;
@@ -46,14 +47,15 @@ public class RandomSizeGenerator : MonoBehaviour
     {
         ghostSpawn();
         makeBorder();
-        makeTeloporters();
+        makeTeloporters();       
         makePath();
+        //  ghostSpawn();
         instanciateMap();
     }
     void ghostSpawn() //generate the area for the ghosts to spawn in
     {
         int spawnWidth = 10, spawnHeight = 7;
-        int startX = width / 2 - 4, startY = height / 2 - 3;
+        int startX = width / 2 - 5, startY = height / 2 - 4;
         //make outside path around
         for (int i = 0; i < spawnWidth; i++)
         {
@@ -71,8 +73,9 @@ public class RandomSizeGenerator : MonoBehaviour
         {
             map[startX + spawnWidth - 1, startY + i] = (int)TileType.spawnEmpty;
         }
-
-        for(int i = 2; i < spawnWidth - 2; i++)
+        prevPos.Add(new prevPos(new Vector2(startX + 5, startY -2), Vector2.zero)); //do this so that if path cannot reach below normally still can generate one down their
+       // Debug.Log(new Vector2(startX, startY - 2));
+        for (int i = 2; i < spawnWidth - 2; i++)
         {
             for (int j = 2; j < spawnHeight - 2; j++)
                 map[startX+i, startY+j] = (int)TileType.spawnEmpty;
@@ -87,21 +90,43 @@ public class RandomSizeGenerator : MonoBehaviour
         //height of 11; width of 6
         int teloWidth = 6, teloHeight = 11;
         int startY = Random.Range(2, height - teloHeight - 5);
-        //spawn actual paths
+        //spawn actual paths left side
         makeWidthLine(1, startY - 1, 0, teloWidth, (int)TileType.path);
-        makeWidthLine(1, startY + teloHeight, 0, teloWidth, (int)TileType.path);
+        makeWidthLine(1, startY + teloHeight, 0, teloWidth, (int)TileType.path);        
         for (int i = -1; i <= teloHeight; i++)
         {
             map[6, startY + i] = (int)TileType.path;
             joins.Add(new Vector2(6, startY + i));
         }
+        //spawn actual paths right side
+        makeWidthLine(1, startY - 1, width - teloWidth - 1, teloWidth, (int)TileType.path);
+        makeWidthLine(1, startY + teloHeight, width - teloWidth -1 , teloWidth, (int)TileType.path);
 
-        //spawn actuall walls
+        for (int i = -1; i <= teloHeight; i++)
+        {
+            map[width- teloWidth -1, startY + i] = (int)TileType.path;
+            joins.Add(new Vector2(width - teloWidth -1, startY + i));
+        }
+
+        //spawn actuall walls left
         makeWidthLine(0, startY, 0, teloWidth, (int)TileType.borderWall);
         makeWidthLine(0, startY + 4, 0, teloWidth, (int)TileType.borderWall);
         makeWidthLine(0, startY + 5, 0, teloWidth, (int)TileType.spawnEmpty);
+        //spawn actual walls right
+        makeWidthLine(0, startY, width - teloWidth, teloWidth, (int)TileType.borderWall);
+        makeWidthLine(0, startY + 4, width - teloWidth, teloWidth, (int)TileType.borderWall);
+        makeWidthLine(0, startY + 5, width - teloWidth, teloWidth, (int)TileType.spawnEmpty);
+
+        Instantiate(mapComponents[(int)TileType.teloBlocker], new Vector2(-1, startY + 5), Quaternion.identity, transform);
+        Instantiate(mapComponents[(int)TileType.teloBlocker], new Vector2(width, startY + 5), Quaternion.identity, transform);
+
+        //left walls
         makeWidthLine(0, startY + 6, 0, teloWidth, (int)TileType.borderWall);
         makeWidthLine(0, startY + teloHeight - 1, 0, teloWidth, (int)TileType.borderWall);
+        //right walls
+        makeWidthLine(0, startY + 6, width - teloWidth, teloWidth, (int)TileType.borderWall);
+        makeWidthLine(0, startY + teloHeight - 1, width - teloWidth, teloWidth, (int)TileType.borderWall);
+        //left walls
         for (int i = 1; i <= 3; i++)
             map[teloWidth - 1, startY + i] = (int)TileType.borderWall;
         for (int i = 1; i <= 3; i++)
@@ -116,14 +141,33 @@ public class RandomSizeGenerator : MonoBehaviour
             for (int j = 0; j < teloWidth - 1; j++)
                 map[j, startY + 7 + i] = (int)TileType.emptyOutside;
         }
+        //right walls
+        for (int i = 1; i <= 3; i++)
+            map[width - teloWidth, startY + i] = (int)TileType.borderWall;
+        for (int i = 1; i <= 3; i++)
+            map[width - teloWidth, startY + 6 + i] = (int)TileType.borderWall;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < teloWidth - 1; j++)
+                map[width-j-1, startY + 1 + i] = (int)TileType.emptyOutside;
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < teloWidth - 1; j++)
+                map[width-j-1, startY + 7 + i] = (int)TileType.emptyOutside;
+        }
     }
     void makeWidthLine(int startPos, int startY, int startX, int teloWidth, int tileType)
     {
         for (int i = startPos; i < teloWidth; i++)
         {
             map[startX + i, startY] = tileType;
-            if(tileType == (int)TileType.path)
+            if (tileType == (int)TileType.path)
+            {
                 joins.Add(new Vector2(startX + i, startY));
+              //  if(startX + i > 0 && startY > 0)
+                //    prevPos.Add(new prevPos(new Vector2(startX + i, startY), Vector2.up));
+            }
         }
     }
     void makeBorder()
@@ -139,7 +183,7 @@ public class RandomSizeGenerator : MonoBehaviour
     }
     void makePath()
     {
-        if (prevPos.Count > 0)
+        if (prevPos.Count > 0 && pathStarted == true)
             prevPos.RemoveAt(prevPos.Count - 1);
         else
         {
@@ -147,6 +191,8 @@ public class RandomSizeGenerator : MonoBehaviour
             currPos = new Vector2(1, height - 2);
         }
         List<Vector2> nextPos = validDirections();
+        if(pathStarted == false)
+            pathStarted = true;
 
         while (nextPos.Count > 0)
         {
@@ -397,7 +443,6 @@ public class RandomSizeGenerator : MonoBehaviour
         {
             if (diagWallCount == 4) 
             {
-                Debug.Log("Change");
                 map[i, j] = (int)TileType.emptyInside;
                 return Quaternion.identity;
             }
@@ -408,17 +453,17 @@ public class RandomSizeGenerator : MonoBehaviour
                     checkCornerType(i, j);
                     return Quaternion.identity;
                 }
-                if (!leftUp)
+                else if (!leftUp)
                 {
                     checkCornerType(i, j);
                     return Quaternion.Euler(0, 0, 90);
                 }
-                if (!leftDown)
+                else if (!leftDown)
                 {
                     checkCornerType(i, j);
                     return Quaternion.Euler(0, 0, 180);
                 }
-                if (!rightDown)
+                else if (!rightDown)
                 {
                     checkCornerType(i, j);
                     return Quaternion.Euler(0, 0, -90);
@@ -448,7 +493,11 @@ public class RandomSizeGenerator : MonoBehaviour
         //////////        return Quaternion.Euler(0, 0, -90);
         //////////    }
         //////////}
-
+        else if(wallCount == 3)
+        {
+            if (!up || !down)
+                return Quaternion.Euler(0, 0, 90);
+        }
         else if(wallCount == 2)
         {
             if (down && right)
