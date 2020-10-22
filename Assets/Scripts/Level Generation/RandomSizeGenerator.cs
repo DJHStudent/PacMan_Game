@@ -18,12 +18,12 @@ public class prevPos
 }
 //probably add case where after changed direction just ensure move in that direction first so get three wide gaps
 //max 93 by 93 before too much
-//min height is 18 min with is 20 + whatever teloWidth is
+//min height is 18 min with is 26 + whatever teloWidth is
 public class RandomSizeGenerator : MonoBehaviour
 {
     public int width, height;
     public int[,] map;
-    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside };
+    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner };
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
     Vector2 currPos, currDir, lastDir;
@@ -91,7 +91,10 @@ public class RandomSizeGenerator : MonoBehaviour
         makeWidthLine(1, startY - 1, 0, teloWidth, (int)TileType.path);
         makeWidthLine(1, startY + teloHeight, 0, teloWidth, (int)TileType.path);
         for (int i = -1; i <= teloHeight; i++)
+        {
             map[6, startY + i] = (int)TileType.path;
+            joins.Add(new Vector2(6, startY + i));
+        }
 
         //spawn actuall walls
         makeWidthLine(0, startY, 0, teloWidth, (int)TileType.borderWall);
@@ -103,18 +106,25 @@ public class RandomSizeGenerator : MonoBehaviour
             map[teloWidth - 1, startY + i] = (int)TileType.borderWall;
         for (int i = 1; i <= 3; i++)
             map[teloWidth - 1, startY + 6 + i] = (int)TileType.borderWall;
-        for(int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < teloWidth - 1; j++)
                 map[j, startY + 1 + i] = (int)TileType.emptyOutside;
-        }    
-
-
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < teloWidth - 1; j++)
+                map[j, startY + 7 + i] = (int)TileType.emptyOutside;
+        }
     }
     void makeWidthLine(int startPos, int startY, int startX, int teloWidth, int tileType)
     {
         for (int i = startPos; i < teloWidth; i++)
+        {
             map[startX + i, startY] = tileType;
+            if(tileType == (int)TileType.path)
+                joins.Add(new Vector2(startX + i, startY));
+        }
     }
     void makeBorder()
     {
@@ -338,8 +348,154 @@ public class RandomSizeGenerator : MonoBehaviour
             {
                 int mapValue = map[i, j];
                 if (mapValue != (int)TileType.spawnEmpty)
-                    Instantiate(mapComponents[mapValue], new Vector2(i, j), Quaternion.identity, this.transform);
+                {
+                    Quaternion rote;
+                    if (mapValue == (int)TileType.spawnOpening || mapValue == (int)TileType.emptyOutside || mapValue == (int)TileType.emptyInside || mapValue == (int)TileType.path)
+                        rote = Quaternion.identity;
+                    else
+                    {
+                        rote = determineRote(i, j);
+                        mapValue = map[i, j];
+                    }
+                    Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform);
+                }
             }
         }
+    }
+
+    Quaternion determineRote(int i, int j)
+    {
+        //get all 8 positions around it
+        int wallCount = 0, diagWallCount = 0;
+        bool left = checkWallType(i - 1, j);
+        if (left)
+            wallCount++;
+        bool right = checkWallType(i + 1, j);
+        if (right)
+            wallCount++;
+        bool up = checkWallType(i, j + 1);
+        if (up)
+            wallCount++;
+        bool down = checkWallType(i, j - 1);
+        if (down)
+            wallCount++;
+
+        bool leftUp = checkWallType(i - 1, j + 1);
+        if (leftUp)
+            diagWallCount++;
+        bool leftDown = checkWallType(i - 1, j - 1);
+        if (leftDown)
+            diagWallCount++;
+        bool rightUp = checkWallType(i + 1, j + 1);
+        if (rightUp)
+            diagWallCount++;
+        bool rightDown = checkWallType(i + 1, j - 1);
+        if (rightDown)
+            diagWallCount++;
+
+        if (wallCount == 4)
+        {
+            if (diagWallCount == 4) 
+            {
+                Debug.Log("Change");
+                map[i, j] = (int)TileType.emptyInside;
+                return Quaternion.identity;
+            }
+            else if(diagWallCount == 3)
+            {
+                if (!rightUp)
+                {
+                    checkCornerType(i, j);
+                    return Quaternion.identity;
+                }
+                if (!leftUp)
+                {
+                    checkCornerType(i, j);
+                    return Quaternion.Euler(0, 0, 90);
+                }
+                if (!leftDown)
+                {
+                    checkCornerType(i, j);
+                    return Quaternion.Euler(0, 0, 180);
+                }
+                if (!rightDown)
+                {
+                    checkCornerType(i, j);
+                    return Quaternion.Euler(0, 0, -90);
+                }
+            }
+        }
+        //////////else if(wallCount == 7)
+        //////////{
+        //////////    if (!rightUp)
+        //////////    {
+        //////////        checkCornerType(i, j);
+        //////////        return Quaternion.identity;
+        //////////    }
+        //////////    if (!leftUp)
+        //////////    {
+        //////////        checkCornerType(i, j);
+        //////////        return Quaternion.Euler(0,0,90);
+        //////////    }
+        //////////    if (!leftDown)
+        //////////    {
+        //////////        checkCornerType(i, j);
+        //////////        return Quaternion.Euler(0, 0, 180);
+        //////////    }
+        //////////    if (!rightDown)
+        //////////    {
+        //////////        checkCornerType(i, j);
+        //////////        return Quaternion.Euler(0, 0, -90);
+        //////////    }
+        //////////}
+
+        else if(wallCount == 2)
+        {
+            if (down && right)
+            {
+                checkCornerType(i, j);
+                return Quaternion.Euler(0, 0, -90);
+            }
+            if (down && left)
+            {
+                checkCornerType(i, j);
+                return Quaternion.Euler(0, 0, 180);
+            }
+            if (up && right)
+            {
+                checkCornerType(i, j);
+                return Quaternion.identity;
+            }
+            if (up && left)
+            {
+                checkCornerType(i, j);
+                return Quaternion.Euler(0, 0, 90);
+            }
+            if (left && right)
+                return Quaternion.Euler(0, 0, 90);
+        }
+        ////////else if(wallCount == 2)
+        ////////{
+        ////////    if (left && right)
+        ////////        return Quaternion.Euler(0, 0, 90);
+        ////////}
+        else if(wallCount == 1)
+        {
+            if (left || right)
+                return Quaternion.Euler(0, 0, 90);
+        }
+        return Quaternion.identity;
+    }
+    bool checkWallType(int i, int j)
+    {
+        bool safe = i >= 0 && j >= 0 && i < width && j < height;
+        return safe && map[i, j] != (int)TileType.path && map[i, j] != (int)TileType.spawnEmpty && map[i, j] != (int)TileType.spawnOpening && map[i, j] != (int)TileType.emptyOutside;
+    }
+    void checkCornerType(int i, int j)
+    {
+        if (map[i, j] == (int)TileType.borderWall)
+            map[i, j] = (int)TileType.outsideCorner;
+        else
+            map[i, j] = (int)TileType.insideCorner;
     }
 }

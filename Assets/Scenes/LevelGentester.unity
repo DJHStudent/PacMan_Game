@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89ccfb5e75c5ac54aa74e47718ed8933, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 40
+  width: 26
   height: 18
   mapComponents:
   - {fileID: 5839215894744882725, guid: fa7c8ccca84a2ba4eb594edb0debda44, type: 3}
@@ -160,6 +160,9 @@ MonoBehaviour:
   - {fileID: 5839215894744882725, guid: fa7c8ccca84a2ba4eb594edb0debda44, type: 3}
   - {fileID: 1610080688809487127, guid: 3b36dbfedf79da1458b84a5d80a57ac6, type: 3}
   - {fileID: 8440270810205229280, guid: 3e5a6487b11d0eb4a808484c9b5973ef, type: 3}
+  - {fileID: 4338323962370237298, guid: 3e6afaa4d04974d498c993af9634d1bf, type: 3}
+  - {fileID: 3887098512766927932, guid: 1eaddff19bdc64a47a65666e44a52fdf, type: 3}
+  - {fileID: 3674444065689870209, guid: 6949b2fc02c06524c9a76696a0f0888f, type: 3}
 --- !u!4 &448190077
 Transform:
   m_ObjectHideFlags: 0
