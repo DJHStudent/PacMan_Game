@@ -16,15 +16,17 @@ public class prevPos
         this.currDir = currDir;
     }
 }
+//potentially not work with finsihing when all pellets eaten
 //probably add case where after changed direction just ensure move in that direction first so get three wide gaps
-//max 93 by 93 before too much
+//max 92 by 92 before too much
 //min height is 18 min with is 28
 public class RandomSizeGenerator : MonoBehaviour
 {
     public int width, height;
     bool pathStarted = false;
     public int[,] map;
-    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner, teloBlocker };
+    public int pelletAmount;
+    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner, teloBlocker, powerPellet };
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
     Vector2 currPos, currDir, lastDir;
@@ -32,25 +34,23 @@ public class RandomSizeGenerator : MonoBehaviour
     List<prevPos> prevPos = new List<prevPos>();
     List<Vector2> joins = new List<Vector2>();
 
+    //ghost4 waypoints
+    public GameObject wayPointStart;
+    int wayPointX, wayPointY;
+
     void Start()
     {
         map = new int[width, height];
         generateMap();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-    void generateMap()
+    void generateMap() //call all methods in turn to generate the map
     {
         ghostSpawn();
         makeBorder();
         makeTeloporters();       
         makePath();
-        //  ghostSpawn();
         instanciateMap();
+        wayPointStart.AddComponent<Ghost4Waypoints>();
     }
     void ghostSpawn() //generate the area for the ghosts to spawn in
     {
@@ -85,7 +85,7 @@ public class RandomSizeGenerator : MonoBehaviour
         map[startX + 5, startY + spawnHeight - 2] = (int)TileType.spawnOpening;
 
     }
-    void makeTeloporters()
+    void makeTeloporters() //generate the two teloporters for pacStudent to use
     {
         //height of 11; width of 6
         int teloWidth = 6, teloHeight = 11;
@@ -123,6 +123,8 @@ public class RandomSizeGenerator : MonoBehaviour
         //left walls
         makeWidthLine(0, startY + 6, 0, teloWidth, (int)TileType.borderWall);
         makeWidthLine(0, startY + teloHeight - 1, 0, teloWidth, (int)TileType.borderWall);
+        wayPointX = 0; wayPointY = startY + 6;
+
         //right walls
         makeWidthLine(0, startY + 6, width - teloWidth, teloWidth, (int)TileType.borderWall);
         makeWidthLine(0, startY + teloHeight - 1, width - teloWidth, teloWidth, (int)TileType.borderWall);
@@ -162,7 +164,7 @@ public class RandomSizeGenerator : MonoBehaviour
         for (int i = startPos; i < teloWidth; i++)
         {
             map[startX + i, startY] = tileType;
-            if (tileType == (int)TileType.path)
+            if (tileType == (int)TileType.path || tileType == (int)TileType.powerPellet)
             {
                 joins.Add(new Vector2(startX + i, startY));
               //  if(startX + i > 0 && startY > 0)
@@ -267,7 +269,7 @@ public class RandomSizeGenerator : MonoBehaviour
     }
     bool canSpawnPath(int posX, int posY)
     {
-        return map[posX, posY] == (int)TileType.path || map[posX, posY] == (int)TileType.spawnEmpty;
+        return isPath(posX, posY) || map[posX, posY] == (int)TileType.spawnEmpty;
     }
     List<Vector2> validDirections()
     {
@@ -393,17 +395,30 @@ public class RandomSizeGenerator : MonoBehaviour
             for (int j = 0; j < height; j++)
             {
                 int mapValue = map[i, j];
+                if (map[i, j] == (int)TileType.path)
+                {
+                    pelletAmount++;
+                    int rand = Random.Range(0, 50);
+                    if (rand == 0) //randomly choose if a pellet should be a power pellet or not
+                    {
+                        map[i, j] = (int)TileType.powerPellet;
+                        mapValue = map[i, j];
+                    }
+                }
                 if (mapValue != (int)TileType.spawnEmpty)
                 {
                     Quaternion rote;
-                    if (mapValue == (int)TileType.spawnOpening || mapValue == (int)TileType.emptyOutside || mapValue == (int)TileType.emptyInside || mapValue == (int)TileType.path)
+                    if (mapValue == (int)TileType.spawnOpening || mapValue == (int)TileType.emptyOutside || mapValue == (int)TileType.emptyInside || isPath(i, j))
                         rote = Quaternion.identity;
                     else
                     {
                         rote = determineRote(i, j);
                         mapValue = map[i, j];
                     }
-                    Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform);
+                    if(i == wayPointX && j == wayPointY) //if at the waypint start position then set this as the start position for the waypoint system
+                        wayPointStart = Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform);
+                    else
+                        Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform);
                 }
             }
         }
@@ -470,29 +485,6 @@ public class RandomSizeGenerator : MonoBehaviour
                 }
             }
         }
-        //////////else if(wallCount == 7)
-        //////////{
-        //////////    if (!rightUp)
-        //////////    {
-        //////////        checkCornerType(i, j);
-        //////////        return Quaternion.identity;
-        //////////    }
-        //////////    if (!leftUp)
-        //////////    {
-        //////////        checkCornerType(i, j);
-        //////////        return Quaternion.Euler(0,0,90);
-        //////////    }
-        //////////    if (!leftDown)
-        //////////    {
-        //////////        checkCornerType(i, j);
-        //////////        return Quaternion.Euler(0, 0, 180);
-        //////////    }
-        //////////    if (!rightDown)
-        //////////    {
-        //////////        checkCornerType(i, j);
-        //////////        return Quaternion.Euler(0, 0, -90);
-        //////////    }
-        //////////}
         else if(wallCount == 3)
         {
             if (!up || !down)
@@ -523,11 +515,6 @@ public class RandomSizeGenerator : MonoBehaviour
             if (left && right)
                 return Quaternion.Euler(0, 0, 90);
         }
-        ////////else if(wallCount == 2)
-        ////////{
-        ////////    if (left && right)
-        ////////        return Quaternion.Euler(0, 0, 90);
-        ////////}
         else if(wallCount == 1)
         {
             if (left || right)
@@ -538,7 +525,7 @@ public class RandomSizeGenerator : MonoBehaviour
     bool checkWallType(int i, int j)
     {
         bool safe = i >= 0 && j >= 0 && i < width && j < height;
-        return safe && map[i, j] != (int)TileType.path && map[i, j] != (int)TileType.spawnEmpty && map[i, j] != (int)TileType.spawnOpening && map[i, j] != (int)TileType.emptyOutside;
+        return safe && !isPath(i,j) && map[i, j] != (int)TileType.spawnEmpty && map[i, j] != (int)TileType.spawnOpening && map[i, j] != (int)TileType.emptyOutside;
     }
     void checkCornerType(int i, int j)
     {
@@ -546,5 +533,10 @@ public class RandomSizeGenerator : MonoBehaviour
             map[i, j] = (int)TileType.outsideCorner;
         else
             map[i, j] = (int)TileType.insideCorner;
+    }
+
+    bool isPath(int i, int j)
+    {
+        return map[i, j] == (int)TileType.powerPellet || map[i, j] == (int)TileType.path;
     }
 }

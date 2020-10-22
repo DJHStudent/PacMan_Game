@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Collections;
 using UnityEngine;
 
 public class nextPos
@@ -101,10 +100,18 @@ public class GhostController : MonoBehaviour
     }
     public void initialize()
     {
-        spawnPos = transform.position;
         playerPos = GameManager.pacStudentController.gameObject;
         animator.speed = 1;
-        ghost4nextLocation = GameManager.levelGenerator.wayPointStart;
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+            ghost4nextLocation = GameManager.levelGenerator.wayPointStart;
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+        {
+            transform.position = new Vector2(GameManager.randomMaze.width / 2, GameManager.randomMaze.height / 2);
+            GameObject[] spawnOpenings = GameObject.FindGameObjectsWithTag("spawnOpening");
+            exitSpawnPos = new Vector2[] { spawnOpenings[0].transform.position, spawnOpenings[1].transform.position};
+            ghost4nextLocation = GameManager.randomMaze.wayPointStart;
+        }
+        spawnPos = transform.position;
         setExitPos();
         setNextPos();
     }
@@ -318,12 +325,9 @@ public class GhostController : MonoBehaviour
 
             {
                 ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-                //////////if (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
-                //////////    ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-                //////////if (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
+             
                 while (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
                     ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-              //  Debug.Log("made it to location" + ghost4nextLocation.transform.localPosition);
             }
             nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
 

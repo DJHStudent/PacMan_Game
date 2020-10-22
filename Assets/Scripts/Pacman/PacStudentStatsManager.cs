@@ -16,7 +16,11 @@ public class PacStudentStatsManager : MonoBehaviour
     {
         GameManager.pacStudentController.pause();
         paused = true;
-        pelletAmount = GameManager.levelGenerator.pelletAmount * 4 - 2;
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+            pelletAmount = GameManager.levelGenerator.pelletAmount * 4 - 2;
+        else if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+            pelletAmount = GameManager.randomMaze.pelletAmount;
+        Debug.Log(pelletAmount + "   " + GameManager.activeScene);
         StartCoroutine(startTimer()); 
         //InvokeRepeating("playTime", .01f, .01f);
     }

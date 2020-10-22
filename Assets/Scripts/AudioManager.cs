@@ -13,7 +13,6 @@ public class AudioManager : MonoBehaviour
     //pacStudent audio
     public void pause()
     {
-        Debug.Log(pacStudentAudio);
         pacStudentAudio.Stop();
     }
     public void hitWall()

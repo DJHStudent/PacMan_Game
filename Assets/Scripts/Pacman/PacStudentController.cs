@@ -11,13 +11,29 @@ public class PacStudentController : MonoBehaviour
     public LayerMask ignorePellet;
     public ParticleSystem wallPartical, deathPartical;
     Vector2 wallHitPoint, startPos;
-
+    public float leftTeloPoint, rightTeloPoint;
     char lastInput = 'D', currentInput = 'D';
     void Start()
     {
         animator = GetComponent<Animator>();
-        startPos = transform.position;
+        //if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+        //{
+        //    //leftTeloPoint = -14;
+        //    //rightTeloPoint = 13;
+        //}
+        //else if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+        //{
+        //    leftTeloPoint = 0;
+        //    rightTeloPoint = GameManager.randomMaze.width;
+        //    Debug.Log(rightTeloPoint);
+          //  transform.position = new Vector2(1, GameManager.randomMaze.height - 2);
+       // }
+            startPos = transform.position;
      //   getNextPos();
+    }
+    public void setStartPos()
+    {
+        transform.position = new Vector2(1, GameManager.randomMaze.height - 2);
     }
     public void pause()
     {
@@ -170,16 +186,16 @@ public class PacStudentController : MonoBehaviour
 
     void teleport() //when at portal pos move pacStudent to other side of map
     {
-        if (transform.position.x <= -14)
+        if (transform.position.x <= leftTeloPoint)
         {
             Vector2 pos = transform.position;
-            pos.x = 13;
+            pos.x = rightTeloPoint;
             transform.position = pos;
         }   
-        else if(transform.position.x >= 13)
+        else if(transform.position.x >= rightTeloPoint)
         {
             Vector2 pos = transform.position;
-            pos.x = -14;
+            pos.x = leftTeloPoint;
             transform.position = pos;
         }
     }
