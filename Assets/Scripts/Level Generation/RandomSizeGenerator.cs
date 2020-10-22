@@ -1,6 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
+/*
+ what needs doin
+ 1.fix when checking valid wall and next to border
+ 2.when generating and change corner ensure always move in same direction
+     */
 public class prevPos
 {
     public Vector2 currPos, currDir;
@@ -12,11 +18,12 @@ public class prevPos
 }
 //probably add case where after changed direction just ensure move in that direction first so get three wide gaps
 //max 93 by 93 before too much
+//min height is 18 min with is 20 + whatever teloWidth is
 public class RandomSizeGenerator : MonoBehaviour
 {
     public int width, height;
     public int[,] map;
-    enum TileType { empty, path, wall, borderWall };
+    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside };
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
     Vector2 currPos, currDir, lastDir;
@@ -37,8 +44,77 @@ public class RandomSizeGenerator : MonoBehaviour
     }
     void generateMap()
     {
+        ghostSpawn();
         makeBorder();
+        makeTeloporters();
+        makePath();
         instanciateMap();
+    }
+    void ghostSpawn() //generate the area for the ghosts to spawn in
+    {
+        int spawnWidth = 10, spawnHeight = 7;
+        int startX = width / 2 - 4, startY = height / 2 - 3;
+        //make outside path around
+        for (int i = 0; i < spawnWidth; i++)
+        {
+            map[startX + i, startY] = (int)TileType.spawnEmpty;
+        }
+        for (int i = 0; i < spawnHeight; i++)
+        {
+            map[startX, startY + i] = (int)TileType.spawnEmpty;
+        }
+        for (int i = 0; i < spawnWidth; i++)
+        {
+            map[startX + i, startY + spawnHeight - 1] = (int)TileType.spawnEmpty;
+        }
+        for (int i = 0; i < spawnHeight; i++)
+        {
+            map[startX + spawnWidth - 1, startY + i] = (int)TileType.spawnEmpty;
+        }
+
+        for(int i = 2; i < spawnWidth - 2; i++)
+        {
+            for (int j = 2; j < spawnHeight - 2; j++)
+                map[startX+i, startY+j] = (int)TileType.spawnEmpty;
+        }
+        //make ghost exit
+        map[startX + 4, startY + spawnHeight - 2] = (int)TileType.spawnOpening;
+        map[startX + 5, startY + spawnHeight - 2] = (int)TileType.spawnOpening;
+
+    }
+    void makeTeloporters()
+    {
+        //height of 11; width of 6
+        int teloWidth = 6, teloHeight = 11;
+        int startY = Random.Range(2, height - teloHeight - 5);
+        //spawn actual paths
+        makeWidthLine(1, startY - 1, 0, teloWidth, (int)TileType.path);
+        makeWidthLine(1, startY + teloHeight, 0, teloWidth, (int)TileType.path);
+        for (int i = -1; i <= teloHeight; i++)
+            map[6, startY + i] = (int)TileType.path;
+
+        //spawn actuall walls
+        makeWidthLine(0, startY, 0, teloWidth, (int)TileType.borderWall);
+        makeWidthLine(0, startY + 4, 0, teloWidth, (int)TileType.borderWall);
+        makeWidthLine(0, startY + 5, 0, teloWidth, (int)TileType.spawnEmpty);
+        makeWidthLine(0, startY + 6, 0, teloWidth, (int)TileType.borderWall);
+        makeWidthLine(0, startY + teloHeight - 1, 0, teloWidth, (int)TileType.borderWall);
+        for (int i = 1; i <= 3; i++)
+            map[teloWidth - 1, startY + i] = (int)TileType.borderWall;
+        for (int i = 1; i <= 3; i++)
+            map[teloWidth - 1, startY + 6 + i] = (int)TileType.borderWall;
+        for(int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < teloWidth - 1; j++)
+                map[j, startY + 1 + i] = (int)TileType.emptyOutside;
+        }    
+
+
+    }
+    void makeWidthLine(int startPos, int startY, int startX, int teloWidth, int tileType)
+    {
+        for (int i = startPos; i < teloWidth; i++)
+            map[startX + i, startY] = tileType;
     }
     void makeBorder()
     {
@@ -50,7 +126,6 @@ public class RandomSizeGenerator : MonoBehaviour
                     map[i, j] = (int)TileType.borderWall;
             }
         }
-        makePath();
     }
     void makePath()
     {
@@ -89,7 +164,7 @@ public class RandomSizeGenerator : MonoBehaviour
         {
             int posX = Mathf.RoundToInt(joins[i].x), posY = Mathf.RoundToInt(joins[i].y);
             //left
-            if (posX - 3 > 0 && map[posX - 1, posY] == (int)TileType.empty && map[posX - 2, posY] == (int)TileType.empty && map[posX - 3, posY] == (int)TileType.path
+            if (posX - 3 > 0 && map[posX - 1, posY] == (int)TileType.empty && map[posX - 2, posY] == (int)TileType.empty && canSpawnPath(posX - 3, posY)
                 && map[posX - 1, posY + 1] == (int)TileType.empty && map[posX - 1, posY + 2] == (int)TileType.empty &&
                 map[posX - 1, posY - 1] == (int)TileType.empty && map[posX - 1, posY - 2] == (int)TileType.empty
                 && map[posX - 2, posY + 1] == (int)TileType.empty && map[posX - 2, posY + 2] == (int)TileType.empty &&
@@ -98,9 +173,19 @@ public class RandomSizeGenerator : MonoBehaviour
                 map[posX - 1, posY] = (int)TileType.path;
                 map[posX - 2, posY] = (int)TileType.path;
             }
+            //right
+            if (posX + 3 < width && map[posX + 1, posY] == (int)TileType.empty && map[posX + 2, posY] == (int)TileType.empty && canSpawnPath(posX + 3, posY)
+                && map[posX + 1, posY + 1] == (int)TileType.empty && map[posX + 1, posY + 2] == (int)TileType.empty &&
+                map[posX + 1, posY - 1] == (int)TileType.empty && map[posX + 1, posY - 2] == (int)TileType.empty
+                && map[posX + 2, posY + 1] == (int)TileType.empty && map[posX + 2, posY + 2] == (int)TileType.empty &&
+                map[posX + 2, posY - 1] == (int)TileType.empty && map[posX + 2, posY - 2] == (int)TileType.empty)
+            {
+                map[posX + 1, posY] = (int)TileType.path;
+                map[posX + 2, posY] = (int)TileType.path;
+            }
 
             //down
-            if (posY - 3 > 0 && map[posX, posY - 1] == (int)TileType.empty && map[posX, posY - 2] == (int)TileType.empty && map[posX, posY - 3] == (int)TileType.path
+            if (posY - 3 > 0 && map[posX, posY - 1] == (int)TileType.empty && map[posX, posY - 2] == (int)TileType.empty && canSpawnPath(posX, posY - 3)
                 && map[posX + 1, posY - 1] == (int)TileType.empty && map[posX + 2, posY - 1] == (int)TileType.empty &&
                 map[posX - 1, posY - 1] == (int)TileType.empty && map[posX - 2, posY - 1] == (int)TileType.empty
                 && map[posX + 1, posY - 2] == (int)TileType.empty && map[posX + 2, posY - 2] == (int)TileType.empty &&
@@ -110,8 +195,23 @@ public class RandomSizeGenerator : MonoBehaviour
                 map[posX, posY - 1] = (int)TileType.path;
                 map[posX, posY - 2] = (int)TileType.path;
             }
+            //up
+            if (posY + 3 < height && map[posX, posY + 1] == (int)TileType.empty && map[posX, posY + 2] == (int)TileType.empty && canSpawnPath(posX, posY + 3)
+                && map[posX + 1, posY + 1] == (int)TileType.empty && map[posX + 2, posY + 1] == (int)TileType.empty &&
+                map[posX - 1, posY + 1] == (int)TileType.empty && map[posX - 2, posY + 1] == (int)TileType.empty
+                && map[posX + 1, posY + 2] == (int)TileType.empty && map[posX + 2, posY + 2] == (int)TileType.empty &&
+                map[posX - 1, posY + 2] == (int)TileType.empty && map[posX - 2, posY + 2] == (int)TileType.empty)
+
+            {
+                map[posX, posY + 1] = (int)TileType.path;
+                map[posX, posY + 2] = (int)TileType.path;
+            }
 
         }
+    }
+    bool canSpawnPath(int posX, int posY)
+    {
+        return map[posX, posY] == (int)TileType.path || map[posX, posY] == (int)TileType.spawnEmpty;
     }
     List<Vector2> validDirections()
     {
@@ -237,7 +337,7 @@ public class RandomSizeGenerator : MonoBehaviour
             for (int j = 0; j < height; j++)
             {
                 int mapValue = map[i, j];
-               //// if (mapValue != 0)
+                if (mapValue != (int)TileType.spawnEmpty)
                     Instantiate(mapComponents[mapValue], new Vector2(i, j), Quaternion.identity, this.transform);
             }
         }
