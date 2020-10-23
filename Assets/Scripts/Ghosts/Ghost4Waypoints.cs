@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditorInternal;
 using UnityEngine;
 
 public class Ghost4Waypoints : MonoBehaviour //for the border wall set each valid position as a waypoint for ghost 4 to follow

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -46,7 +45,10 @@ public class GameManager : MonoBehaviour
         }
         saveManager = GameObject.Find("SaveManager").GetComponent<SaveManager>();
         initializeGhosts();
+        pacStudentController.initilize();
         audioManager.initialize();
+        levelUIManager.initilize();
+        levelUIManager.statsManager.initilize();
     }
     void initializeGhosts()
     {

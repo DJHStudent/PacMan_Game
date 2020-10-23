@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class PacStudentStatsManager : MonoBehaviour
 {
@@ -12,7 +10,7 @@ public class PacStudentStatsManager : MonoBehaviour
 
     public bool paused = false;
  
-    public void Start()
+    public void initilize()
     {
         GameManager.pacStudentController.pause();
         paused = true;

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PacStudentController : MonoBehaviour
 {
@@ -12,7 +10,7 @@ public class PacStudentController : MonoBehaviour
     Vector2 wallHitPoint, startPos;
     public float leftTeloPoint, rightTeloPoint;
     char lastInput = 'D', currentInput = 'D';
-    void Start()
+    public void initilize()
     {
         animator = GetComponent<Animator>();
         startPos = transform.position;

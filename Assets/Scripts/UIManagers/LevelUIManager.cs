@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +10,7 @@ public class LevelUIManager : MonoBehaviour
     public List<Image> ghostLives = new List<Image>();
     public PacStudentStatsManager statsManager;
 
-    void Awake()
+    public void initilize()
     {
         statsManager = GetComponent<PacStudentStatsManager>();
     }
