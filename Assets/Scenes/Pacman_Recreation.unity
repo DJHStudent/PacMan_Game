@@ -845,8 +845,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4aa6838e2a6a0e41a61f75c420a20f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  straightWallOut: {fileID: 21300000, guid: 6f200968999cef24ab6efe3f9b31dcfe, type: 3}
-  straightWallIn: {fileID: 21300000, guid: 0c77554a08c592c4b9156478111f36a7, type: 3}
+  wall:
+    serializedVersion: 2
+    m_Bits: 1024
+  innerWall:
+    serializedVersion: 2
+    m_Bits: 2304
 --- !u!114 &584410457
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6833,7 +6837,7 @@ PrefabInstance:
     - target: {fileID: 5420315146010365853, guid: 2d4ee802f661fde4da174491bcb5abc1,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: changeScene
+      value: leaveScene
       objectReference: {fileID: 0}
     - target: {fileID: 5420315146010365853, guid: 2d4ee802f661fde4da174491bcb5abc1,
         type: 3}

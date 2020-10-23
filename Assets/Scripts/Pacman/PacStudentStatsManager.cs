@@ -16,29 +16,44 @@ public class PacStudentStatsManager : MonoBehaviour
     {
         GameManager.pacStudentController.pause();
         paused = true;
-        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
-            pelletAmount = GameManager.levelGenerator.pelletAmount * 4 - 2;
-        else if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
-            pelletAmount = GameManager.randomMaze.pelletAmount;
         StartCoroutine(startTimer()); 
         //InvokeRepeating("playTime", .01f, .01f);
     }
+    public void determinePellets()
+    {
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+            pelletAmount = GameManager.levelGenerator.pelletAmount * 4 - 2;
+        else if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+            pelletAmount = GameManager.randomMap.pelletAmount;
+    }
     IEnumerator startTimer() //countdown from 3
     {
-        GameManager.level1UIManager.setStartTimer("3");
+        GameManager.levelUIManager.setStartTimer("3");
         yield return new WaitForSecondsRealtime(1);
-        GameManager.level1UIManager.setStartTimer("2");
+        GameManager.levelUIManager.setStartTimer("2");
         yield return new WaitForSecondsRealtime(1);
-        GameManager.level1UIManager.setStartTimer("1");
+        GameManager.levelUIManager.setStartTimer("1");
         yield return new WaitForSecondsRealtime(1);
-        GameManager.level1UIManager.setStartTimer("Go!");
+        GameManager.levelUIManager.setStartTimer("Go!");
         yield return new WaitForSecondsRealtime(1);
-        GameManager.level1UIManager.startTimerVisable(false);
+        GameManager.levelUIManager.startTimerVisable(false);
         paused = false;
-        GameManager.ghost1.initialize();
-        GameManager.ghost2.initialize();
-        GameManager.ghost3.initialize();
-        GameManager.ghost4.initialize();
+        foreach (GhostController ghost in GameManager.ghost1)
+        {
+            ghost.initialize();
+        }
+        foreach (GhostController ghost in GameManager.ghost2)
+        {
+            ghost.initialize();
+        }
+        foreach (GhostController ghost in GameManager.ghost3)
+        {
+            ghost.initialize();
+        }
+        foreach (GhostController ghost in GameManager.ghost4)
+        {
+            ghost.initialize();
+        }
         levelStartTime = Time.timeSinceLevelLoad;
         GameManager.audioManager.normalState();
     }
@@ -51,7 +66,7 @@ public class PacStudentStatsManager : MonoBehaviour
     public void addScore(int amount, GameObject hitObj)
     {
         this.score += amount;
-        GameManager.level1UIManager.setScore("" + this.score);
+        GameManager.levelUIManager.setScore("" + this.score);
         if (hitObj != null)
             Destroy(hitObj);
     }
@@ -60,34 +75,58 @@ public class PacStudentStatsManager : MonoBehaviour
         float time = Time.timeSinceLevelLoad - levelStartTime;
         string mins = ((int)time / 60).ToString("00:");
         string secs = (time % 60).ToString("00.00");
-        GameManager.level1UIManager.setTime(mins + secs.Replace('.', ':'));
+        GameManager.levelUIManager.setTime(mins + secs.Replace('.', ':'));
     }
     public void startScared()
     {
-        GameManager.level1UIManager.scaredTimerVisability(true);
+        GameManager.levelUIManager.scaredTimerVisability(true);
         scaredTime = 10;
-        GameManager.level1UIManager.setScaredTime("" + scaredTime);
+        GameManager.levelUIManager.setScaredTime("" + scaredTime);
         InvokeRepeating("scaredLeft", 1, 1);
     }
 
     public void scaredLeft()//fixup with ghosts
     {
         scaredTime--;
-        GameManager.level1UIManager.setScaredTime("" + scaredTime);
+        GameManager.levelUIManager.setScaredTime("" + scaredTime);
         if (scaredTime == 3)
         {
-            GameManager.ghost1.recovery();
-            GameManager.ghost2.recovery();
-            GameManager.ghost3.recovery();
-            GameManager.ghost4.recovery();
+            foreach (GhostController ghost in GameManager.ghost1)
+            {
+                ghost.recovery();
+            }
+            foreach (GhostController ghost in GameManager.ghost2)
+            {
+                ghost.recovery();
+            }
+            foreach (GhostController ghost in GameManager.ghost3)
+            {
+                ghost.recovery();
+            }
+            foreach (GhostController ghost in GameManager.ghost4)
+            {
+                ghost.recovery();
+            }
         }
         if (scaredTime == 0)
         {
-            GameManager.level1UIManager.scaredTimerVisability(false);
-            GameManager.ghost1.normal();
-            GameManager.ghost2.normal();
-            GameManager.ghost3.normal();
-            GameManager.ghost4.normal();
+            GameManager.levelUIManager.scaredTimerVisability(false);
+            foreach (GhostController ghost in GameManager.ghost1)
+            {
+                ghost.normal();
+            }
+            foreach (GhostController ghost in GameManager.ghost2)
+            {
+                ghost.normal();
+            }
+            foreach (GhostController ghost in GameManager.ghost3)
+            {
+                ghost.normal();
+            }
+            foreach (GhostController ghost in GameManager.ghost4)
+            {
+                ghost.normal();
+            }
             CancelInvoke();
         }
     }
@@ -95,7 +134,7 @@ public class PacStudentStatsManager : MonoBehaviour
     public void removeLife()
     {
         lives--;
-        GameManager.level1UIManager.setLives(lives);
+        GameManager.levelUIManager.setLives(lives);
         gameOver();
     }
     public void removePellet()
@@ -110,13 +149,26 @@ public class PacStudentStatsManager : MonoBehaviour
             //pause everything
             paused = true;
             GameManager.pacStudentController.pause();            
-            GameManager.ghost1.pause();
-            GameManager.ghost2.pause();
-            GameManager.ghost3.pause();
-            GameManager.ghost4.pause();
-            GameManager.level1UIManager.setStartTimer("Game Over");
-            GameManager.level1UIManager.startTimerVisable(true);
-
+            foreach (GhostController ghost in GameManager.ghost1)
+            {
+                ghost.pause();
+            }
+            foreach (GhostController ghost in GameManager.ghost2)
+            {
+                ghost.pause();
+            }
+            foreach (GhostController ghost in GameManager.ghost3)
+            {
+                ghost.pause();
+            }
+            foreach (GhostController ghost in GameManager.ghost4)
+            {
+                ghost.pause();
+            }
+            GameManager.levelUIManager.setStartTimer("Game Over");
+            GameManager.levelUIManager.startTimerVisable(true);
+            Ghost4Waypoints.currDir = Vector2.zero;
+            Ghost4Waypoints.straightWall = null;
             Invoke("changeScene", 3);
         }
     }

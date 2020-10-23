@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-/*
- what needs doin
- 1.fix when checking valid wall and next to border
- 2.when generating and change corner ensure always move in same direction
-     */
 public class prevPos
 {
     public Vector2 currPos, currDir;
@@ -16,28 +11,23 @@ public class prevPos
         this.currDir = currDir;
     }
 }
-//potentially not work with finsihing when all pellets eaten
-//probably add case where after changed direction just ensure move in that direction first so get three wide gaps
-//max 92 by 92 before too much
-//min height is 18 min with is 28
-public class RandomSizeGenerator : MonoBehaviour
+public class RandomMapGenerator : MonoBehaviour
 {
     public int width, height;
+    public GameObject ghost1, ghost2, ghost3, ghost4;
+    public int ghost1Amount, ghost2Amount, ghost3Amount, ghost4Amount;
     bool pathStarted = false;
     public int[,] map;
     public int pelletAmount;
     enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner, teloBlocker, powerPellet };
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
-    Vector2 currPos, currDir, lastDir;
+    Vector2 currPos, currDir;
 
     List<prevPos> prevPos = new List<prevPos>();
     List<Vector2> joins = new List<Vector2>();
-
-    //ghost4 waypoints
     public GameObject wayPointStart;
     int wayPointX, wayPointY;
-
     void Start()
     {
         map = new int[width, height];
@@ -50,8 +40,22 @@ public class RandomSizeGenerator : MonoBehaviour
         makeTeloporters();       
         makePath();
         instanciateMap();
-        Ghost4Waypoints.currDir = Vector2.zero;
+        GameManager.levelUIManager.statsManager.determinePellets();
+        Ghost4Waypoints.currDir = Vector2.right;
         wayPointStart.AddComponent<Ghost4Waypoints>();
+    }
+    public void createGhosts() //spawn in the ghosts in the ghost spawn area
+    {
+        Transform ghostParent = GameObject.Find("Ghosts").transform;
+        Vector2 spawnPoint = new Vector2(width / 2, height / 2);
+        for (int i = 0; i < ghost1Amount; i++)
+            Instantiate(ghost1, spawnPoint, Quaternion.identity, ghostParent);
+        for (int i = 0; i < ghost2Amount; i++)
+            Instantiate(ghost2, spawnPoint, Quaternion.identity, ghostParent);
+        for (int i = 0; i < ghost3Amount; i++)
+            Instantiate(ghost3, spawnPoint, Quaternion.identity, ghostParent);
+        for (int i = 0; i < ghost4Amount; i++)
+            Instantiate(ghost4, spawnPoint, Quaternion.identity, ghostParent);
     }
     void ghostSpawn() //generate the area for the ghosts to spawn in
     {
@@ -168,8 +172,6 @@ public class RandomSizeGenerator : MonoBehaviour
             if (tileType == (int)TileType.path || tileType == (int)TileType.powerPellet)
             {
                 joins.Add(new Vector2(startX + i, startY));
-              //  if(startX + i > 0 && startY > 0)
-                //    prevPos.Add(new prevPos(new Vector2(startX + i, startY), Vector2.up));
             }
         }
     }
@@ -400,7 +402,7 @@ public class RandomSizeGenerator : MonoBehaviour
                 {
                     pelletAmount++;
                     int rand = Random.Range(0, 50);
-                    if (rand == 0) //randomly choose if a pellet should be a power pellet or not
+                    if (rand == 0 && i != 1 && j != height - 2) //randomly choose if a pellet should be a power pellet or not never putting one at the players start pos
                     {
                         map[i, j] = (int)TileType.powerPellet;
                         mapValue = map[i, j];
@@ -425,7 +427,7 @@ public class RandomSizeGenerator : MonoBehaviour
         }
     }
 
-    Quaternion determineRote(int i, int j)
+    Quaternion determineRote(int i, int j)//for the walls determine the rotation they should be set at
     {
         //get all 8 positions around it
         int wallCount = 0, diagWallCount = 0;
@@ -535,7 +537,6 @@ public class RandomSizeGenerator : MonoBehaviour
         else
             map[i, j] = (int)TileType.insideCorner;
     }
-
     bool isPath(int i, int j)
     {
         return map[i, j] == (int)TileType.powerPellet || map[i, j] == (int)TileType.path;

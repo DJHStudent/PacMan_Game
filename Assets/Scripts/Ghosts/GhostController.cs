@@ -18,10 +18,9 @@ public class nextPos
 
 public class GhostController : MonoBehaviour
 {
-    //implement A* if time
     public Animator animator;
     Tween tween;
-    float duration = .7f;//.9f;
+    float duration = .7f;
     enum CurrDir { up, left, right, down };
     public enum CurrState { normal, scared, recovery, dead };
     public int currDir = (int)CurrDir.down;
@@ -32,6 +31,7 @@ public class GhostController : MonoBehaviour
     Vector2[] directions = { Vector2.up, Vector2.left, Vector2.right, Vector2.down };
     bool inSpawn = true;
     public bool ghost1, ghost2, ghost3, ghost4;
+    public static float ghostSpawnDelay = -.5f;
 
     bool notAtWall = true;
     [SerializeField]
@@ -59,6 +59,8 @@ public class GhostController : MonoBehaviour
     public void dead()
     {
         currState = (int)CurrState.dead;
+        tween = null;
+        setNextPos();
         animator.SetTrigger("dead");
         GameManager.audioManager.deadState();
     }
@@ -90,7 +92,7 @@ public class GhostController : MonoBehaviour
         if (other.CompareTag("spawnOpening"))
         {
             inSpawn = false;
-            ignorePellet = ignorePellet | (1 << 20);
+            ignorePellet |= 1 << 20;
         }
     }
     public void pause()
@@ -106,16 +108,30 @@ public class GhostController : MonoBehaviour
     }
     public void initialize()
     {
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+        {
+            ghostSpawnDelay += 0.5f;
+            StartCoroutine(startWait());
+        }
+        else if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+            initializeWait();
+    }
+    IEnumerator startWait()//if on innovation scene wait for specified seconds so that all ghosts don't end up clumping tpgether
+    {
+        yield return new WaitForSeconds(ghostSpawnDelay);
+        initializeWait();
+    }
+    void initializeWait()
+    {
         playerPos = GameManager.pacStudentController.gameObject;
         animator.speed = 1;
         if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
             ghost4nextLocation = GameManager.levelGenerator.wayPointStart;
         if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
         {
-            transform.position = new Vector2(GameManager.randomMaze.width / 2, GameManager.randomMaze.height / 2);
             GameObject[] spawnOpenings = GameObject.FindGameObjectsWithTag("spawnOpening");
             exitSpawnPos = new Vector2[] { spawnOpenings[0].transform.position, spawnOpenings[1].transform.position };
-            ghost4nextLocation = GameManager.randomMaze.wayPointStart;
+            ghost4nextLocation = GameManager.randomMap.wayPointStart;
         }
         spawnPos = transform.position;
         setExitPos();
@@ -154,29 +170,32 @@ public class GhostController : MonoBehaviour
 
     void resetGhost()//if ghost back in spawn after being eaten
     {
-        GhostController[] allGhostStates = { GameManager.ghost1, GameManager.ghost2, GameManager.ghost3, GameManager.ghost4 };
+        List<GhostController>[] allGhostStates = { GameManager.ghost1, GameManager.ghost2, GameManager.ghost3, GameManager.ghost4 };
         int deadGhosts = 0;
         bool reset = false;//once ghost reset once don't do it again
-        foreach (GhostController ghostState in allGhostStates) //check the current state of the other ghosts to see if they match and change accordingly
+        foreach (List<GhostController> currGhosts in allGhostStates) //check the current state of the other ghosts to see if they match and change accordingly
         {
-            if (ghostState.gameObject != this.gameObject && ghostState.currState == (int)CurrState.dead) //not current ghost
-                deadGhosts++;
-            if (!reset && ghostState.currState == (int)CurrState.scared)
+            foreach (GhostController ghostState in currGhosts) //in the array of lists get each element in the list here
             {
-                scared();
-                reset = true;
-            }
-            else if (!reset && ghostState.currState == (int)CurrState.recovery)
-            {
-                currState = (int)CurrState.recovery;
-                recovery();
-                reset = true;
-            }
-            else if (!reset && ghostState.currState == (int)CurrState.normal)
-            {
-                currState = (int)CurrState.normal;
-                normal();
-                reset = true;
+                if (ghostState.gameObject != this.gameObject && ghostState.currState == (int)CurrState.dead) //not current ghost but still dead
+                    deadGhosts++;
+                if (!reset && ghostState.currState == (int)CurrState.scared)
+                {
+                    scared();
+                    reset = true;
+                }
+                else if (!reset && ghostState.currState == (int)CurrState.recovery)
+                {
+                    currState = (int)CurrState.recovery;
+                    recovery();
+                    reset = true;
+                }
+                else if (!reset && ghostState.currState == (int)CurrState.normal)
+                {
+                    currState = (int)CurrState.normal;
+                    normal();
+                    reset = true;
+                }
             }
         }
         if (deadGhosts == 0)//if no other ghosts are dead reset the music as well(too the approprate state)
@@ -190,7 +209,7 @@ public class GhostController : MonoBehaviour
 
     Vector2 getNextPos()
     {
-        if (duration != .7f)
+        if (duration != .7f)//resets the ghost speed if not at normal speed
             duration = .7f;
 
         if (inSpawn) //have trigger determining if left spawn or not
@@ -200,7 +219,7 @@ public class GhostController : MonoBehaviour
         }
         else if (currState == (int)CurrState.dead)
         {
-            duration = 5f;
+            duration = 5f; //change the ghost speed when dead
             return spawnPos;
         }
         else if (ghost1 || currState == (int)CurrState.scared || currState == (int)CurrState.recovery)
@@ -282,8 +301,6 @@ public class GhostController : MonoBehaviour
 
         if (isDirSafe((int)CurrDir.down) && isCloser(currPos, currPos + directions[(int)CurrDir.down], target))
             nextPos.Add(addDir((int)CurrDir.down, currPos));
-        if (ghost4)
-            Debug.Log(nextPos.Count);
         if (nextPos.Count == 0) //if no valid direction which is closer or == then choose a random valid direction
         {
             nextPos = ghost3NextPos();
@@ -305,7 +322,7 @@ public class GhostController : MonoBehaviour
         float nextYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(nextPos.y) - Mathf.Abs(target.y)));
 
         float currDist = Vector2.Distance(currPos, target);
-        if(ghost4 && !inSpawn && GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+        if(ghost4 && !inSpawn && GameManager.activeScene == (int)GameManager.ActiveScene.recreation)//if on recreation scene and around the wall sticking out of border prefer to actually move up or down
         {
             if (nextXDist == currXDist && nextYDist < currYDist && currentPos(currPos))
             {
@@ -313,43 +330,13 @@ public class GhostController : MonoBehaviour
                 return true;
             }
         }
-        ////////{
-        ////////    float currYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(target.y) - Mathf.Abs(currPos.y)));
-        ////////    float nextYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(target.y) - Mathf.Abs(nextPos.y)));
-        ////////    if (nextXDist < currYDist && nextXDist == currXDist)
-        ////////        return true;
-        ////////}
-        ////////if (ghost4 && !inSpawn)
-        ////////{
-        ////////  //  Debug.Log(currXDist + "  " + nextXDist + "  " + currYDist + "  " + nextYDist + "dir" + just);
-        ////////    if (nextXDist <= currXDist && nextYDist <= currYDist)// || nextXDist == currXDist && nextYDist < currYDist)
-        ////////    {
-        ////////        return true;
-        ////////    }
-        ////////}
         return Vector2.Distance(nextPos, target) <= currDist && morePos;
-
-
-        ///////////    return nextXDist <= currXDist && nextYDist <= currYDist;// || nextXDist > currXDist && Vector2.Distance(nextPos, target) <= currDist || nextYDist > currYDist && Vector2.Distance(nextPos, target) <= currDist;
-        //////float currDist = Vector2.Distance(currPos, target);
-        /////// return Vector2.Distance(nextPos, target) <= currDist;
-
-        //////////////////////// int targetX = Mathf.RoundToInt(target.x), targetY = Mathf.RoundToInt(target.y);
-        ////////////////float currXDist = Mathf.Abs(currPos.x - targetX);
-        ////////////////float currYDist = Mathf.Abs(currPos.y - targetY);
-        //////////////////float currDist = Mathf.Sqrt(Mathf.Pow(currXDist, 2) + Mathf.Pow(currYDist, 2));
-
-        ////////////////float nextXDist = Mathf.Abs(nextPos.x - target.x);
-        ////////////////float nextYDist = Mathf.Abs(nextPos.y - target.y);
-        //////////////////  float nextDist = Mathf.Sqrt(Mathf.Pow(nextXDist, 2) + Mathf.Pow(nextYDist, 2));
-        ////////////////return nextXDist <= currXDist && nextYDist <= currYDist;
     }
 
     List<nextPos> ghost3NextPos()
     {
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
-        List<nextPos> nextPos = new List<nextPos>();//maybey change this here to a class with the nessesary info for directions as well as animation stuff
-        //add wall sensing later
+        List<nextPos> nextPos = new List<nextPos>();
         if (isDirSafe((int)CurrDir.up)) //if not backstepping && actually closer to target then next pos Valid
             nextPos.Add(addDir((int)CurrDir.up, currPos));
 
@@ -365,69 +352,11 @@ public class GhostController : MonoBehaviour
         {
             nextPos.Add(new nextPos(getOppDir(), currPos - directions[currDir]));
         }
-        if (ghost4)
-            Debug.Log("Randomly moving");
-
         return nextPos;
     }
 
     List<nextPos> ghost4NextPos()
     {
-        //Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
-        //List<nextPos> nextPos = new List<nextPos>();
-        //if (ghost4nextLocation != null && Vector2.Distance(currPos, ghost4nextLocation.transform.position) > 2.05f)
-        //{
-        //    //if (notAtWall) //if away from wall as scared/ dead or just spawned in then continually check if touching a wall
-        //    //{
-        //    //    RaycastHit2D hitUp = Physics2D.Raycast(transform.position, Vector2.up, 1, outerWalls);
-        //    //    RaycastHit2D hitDown = Physics2D.Raycast(transform.position, Vector2.down, 1, outerWalls);
-        //    //    RaycastHit2D hitLeft = Physics2D.Raycast(transform.position, Vector2.left, 1, outerWalls);
-        //    //    RaycastHit2D hitRight = Physics2D.Raycast(transform.position, Vector2.right, 1, outerWalls);
-        //    //    if (hitUp && hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
-        //    //    {
-        //    //        ghost4nextLocation = hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-        //    //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
-        //    //        notAtWall = false;
-        //    //    }
-        //    //    else if (hitDown && hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
-        //    //    {
-        //    //        ghost4nextLocation = hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-        //    //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
-        //    //        notAtWall = false;
-        //    //    }
-        //    //    else if (hitLeft && hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
-        //    //    {
-        //    //        ghost4nextLocation = hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-        //    //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
-        //    //        notAtWall = false;
-        //    //    }
-        //    //    else if (hitRight && hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
-        //    //    {
-        //    //        ghost4nextLocation = hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-        //    //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
-        //    //        notAtWall = false;
-        //    //    }
-        //    //    else //not hit anywall
-        //    //        nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
-        //    //}
-        //    //else
-        //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
-        //}
-        //else
-        //{
-        //    GameObject currWaypint = ghost4nextLocation;
-        //    ghost4nextLocation = currWaypint.GetComponent<Ghost4Waypoints>().nextObj;
-
-
-        //  //  while (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
-        //    //    ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-        //    nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
-
-        //}
-                    
-        //return nextPos;
-
-
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
         List<nextPos> nextPos = new List<nextPos>();
         if (ghost4nextLocation != null && Vector2.Distance(currPos, ghost4nextLocation.transform.position) > 2.05f)
@@ -470,18 +399,10 @@ public class GhostController : MonoBehaviour
         }
         else
         {
-
-            {
-                //ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-
                 while (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
                     ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-            }
             nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
-
         }
-        //check all 4 directions
-
         return nextPos;
     }
     bool isDirSafe(int dir) //checks if the next direction is possible(not wall and not involve backtracking)
@@ -517,7 +438,7 @@ public class GhostController : MonoBehaviour
     }
     void changePos() //move the ghost to the specified location
     {
-        if (!GameManager.level1UIManager.statsManager.paused)
+        if (!GameManager.levelUIManager.statsManager.paused)
         {
             float timeFraction = (Time.time - tween.StartTime) / tween.Duration;
             transform.position = Vector2.Lerp(tween.StartPos, tween.EndPos, timeFraction);

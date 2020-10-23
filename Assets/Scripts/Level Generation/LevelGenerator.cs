@@ -8,7 +8,7 @@ public class LevelGenerator : MonoBehaviour
     public LayerMask wall;
     int currElement;
     public int pelletAmount = 0;
-    public static int[] emptyChanges;
+    //public static int[] emptyChanges;
     public GameObject wayPointStart;
 
     public int[,] levelMap =
@@ -41,7 +41,8 @@ public class LevelGenerator : MonoBehaviour
         GenerateSections(-levelMap.GetLength(1) + 2, levelMap.GetLength(0) - 1, 1, -1, true);
         GenerateSections(levelMap.GetLength(1) + 2, -levelMap.GetLength(0) + 2, -1, 1, false);
         mapSection.transform.parent.transform.rotation = Quaternion.Euler(0, 0, 90); //sets entire map rotation
-        Ghost4Waypoints.currDir = Vector2.zero;
+        GameManager.levelUIManager.statsManager.determinePellets();
+        Ghost4Waypoints.currDir = Vector2.right;
         wayPointStart.AddComponent<Ghost4Waypoints>();
     }
     void GenerateSections(int xPos, int yPos, int xScale, int yScale, bool delete) //determine position and scale of the other section

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Level1UIManager : MonoBehaviour
+public class LevelUIManager : MonoBehaviour
 {
     public Text scoreTxt, scaredTimeTxt, startTimerTxt, playTimeTxt;
     public GameObject startTimerImg;

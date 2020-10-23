@@ -3,25 +3,22 @@ using System.Collections.Generic;
 using UnityEditorInternal;
 using UnityEngine;
 
-public class Ghost4Waypoints : MonoBehaviour
+public class Ghost4Waypoints : MonoBehaviour //for the border wall set each valid position as a waypoint for ghost 4 to follow
 {
-
-    //still issue if in one of the 4 corners is always valid when really should never be valid
-    //in fact just make any corner piece invalid
     public GameObject nextObj;
     LayerMask wall, innerWall;
-    public static Vector2 currDir;//stop backtracking being possible //also issue if on corner states it is valid when really shouldnt be
+    public static Vector2 currDir;//stop backtracking being possible
     public static Sprite straightWall;
     void Start()
     {
-        wall = 1 << 10;
-        innerWall = 1 << 8;
+        wall = GameObject.Find("SceneManager").GetComponent<GameManager>().wall;
+        innerWall = GameObject.Find("SceneManager").GetComponent<GameManager>().innerWall;
         innerWall |= 1 << 11;
-        if(straightWall == null)
+        if (straightWall == null)
             straightWall = gameObject.GetComponent<SpriteRenderer>().sprite;
         nextWall(transform.position);
     }
-    void posAccessible(Vector2 checkFromPos)
+    void posAccessible()
     {
         RaycastHit2D checkUp = nextPosWall(nextObj.transform.position, Vector2.up, 1, innerWall);
         RaycastHit2D checkLeft = nextPosWall(nextObj.transform.position, Vector2.left, 1, innerWall);
@@ -46,7 +43,8 @@ public class Ghost4Waypoints : MonoBehaviour
         {
             nextObj = hit.collider.gameObject;
             currDir = Vector2.up;
-            posAccessible(checkFromPos);
+         //   Debug.Log(currDir);
+            posAccessible();
             return;
         }            
         hit = nextPosWall(checkFromPos, Vector2.down, 1, wall);
@@ -54,7 +52,7 @@ public class Ghost4Waypoints : MonoBehaviour
         {
             nextObj = hit.collider.gameObject;
             currDir = Vector2.down;
-            posAccessible(checkFromPos);
+            posAccessible();
             return;
         }
         hit = nextPosWall(checkFromPos, Vector2.right, 1, wall);
@@ -62,44 +60,47 @@ public class Ghost4Waypoints : MonoBehaviour
         {
             nextObj = hit.collider.gameObject;
             currDir = Vector2.right;
-            posAccessible(checkFromPos);
+            posAccessible();
             return;
         }
-
         hit = nextPosWall(checkFromPos, Vector2.left, 1, wall);
         if (Vector2.left != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {
             nextObj = hit.collider.gameObject;
             currDir = Vector2.left;
-            posAccessible(checkFromPos);
+            posAccessible();
             return;
         }
         //2 distance for the one wide gap between the two teloporters so it doesn't get stuck here
         hit = nextPosWall(checkFromPos, Vector2.up, 2, wall);
-        if (hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
+        if (Vector2.up != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {
             nextObj = hit.collider.gameObject;
+            currDir = Vector2.left;
             hit.collider.gameObject.AddComponent<Ghost4Waypoints>();
             return;
         } 
         hit = nextPosWall(checkFromPos, Vector2.right, 2, wall);
-        if (hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
+        if (Vector2.right != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {
             nextObj = hit.collider.gameObject;
+            currDir = Vector2.left;
             hit.collider.gameObject.AddComponent<Ghost4Waypoints>();
             return;
         }
         hit = nextPosWall(checkFromPos, Vector2.down, 2, wall);
-        if (hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
+        if (Vector2.down != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {
             nextObj = hit.collider.gameObject;
+            currDir = Vector2.left;
             hit.collider.gameObject.AddComponent<Ghost4Waypoints>();
             return;
         }
         hit = nextPosWall(checkFromPos, Vector2.left, 2, wall);
-        if (hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
+        if (Vector2.left != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {
             nextObj = hit.collider.gameObject;
+            currDir = Vector2.left;
             hit.collider.gameObject.AddComponent<Ghost4Waypoints>();
             return;
         }
@@ -121,10 +122,9 @@ public class Ghost4Waypoints : MonoBehaviour
         return hit;
     }
 
-    public IEnumerator waitFrame()
+    public IEnumerator waitFrame()//wait for frame here so not stack overflow
     {
         yield return new WaitForEndOfFrame();
-        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation || GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
             nextWall(nextObj.transform.position);
     }
 }

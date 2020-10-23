@@ -7,12 +7,24 @@ public class SaveManager : MonoBehaviour
 {
     const string saveTime = "time";
     const string saveScore = "score";
+    private static SaveManager saveInstance;
     void Awake()
     {
         DontDestroyOnLoad(this);
+        handleDuplicates();
         loadSave();
     }
-
+    void handleDuplicates()
+    {
+        if (saveInstance == null)
+        {
+            saveInstance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     public void loadSave()
     {
         if (PlayerPrefs.HasKey(saveTime) && PlayerPrefs.HasKey(saveScore))
@@ -28,8 +40,8 @@ public class SaveManager : MonoBehaviour
 
     public void saveStats()
     {
-        int score = GameManager.level1UIManager.statsManager.score;
-        float currTime = Time.timeSinceLevelLoad - GameManager.level1UIManager.statsManager.levelStartTime;
+        int score = GameManager.levelUIManager.statsManager.score;
+        float currTime = Time.timeSinceLevelLoad - GameManager.levelUIManager.statsManager.levelStartTime;
         if (!PlayerPrefs.HasKey(saveScore) || score > PlayerPrefs.GetInt(saveScore))
         {
             PlayerPrefs.SetInt(saveScore, score);
@@ -37,10 +49,5 @@ public class SaveManager : MonoBehaviour
         }
         if (!PlayerPrefs.HasKey(saveTime) || score >= PlayerPrefs.GetInt(saveScore) && currTime < PlayerPrefs.GetFloat(saveTime))
             PlayerPrefs.SetFloat(saveTime, currTime);
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR.WSA.Input;
 
 public class PacStudentController : MonoBehaviour
 {
     Tween tween;
-    const float duration = .7f;//.9f;
+    const float duration = .7f;
     public Animator animator;
     public LayerMask ignorePellet;
     public ParticleSystem wallPartical, deathPartical;
@@ -16,24 +15,11 @@ public class PacStudentController : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
-        //if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
-        //{
-        //    //leftTeloPoint = -14;
-        //    //rightTeloPoint = 13;
-        //}
-        //else if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
-        //{
-        //    leftTeloPoint = 0;
-        //    rightTeloPoint = GameManager.randomMaze.width;
-        //    Debug.Log(rightTeloPoint);
-          //  transform.position = new Vector2(1, GameManager.randomMaze.height - 2);
-       // }
-            startPos = transform.position;
-     //   getNextPos();
+        startPos = transform.position;
     }
     public void setStartPos()
     {
-        transform.position = new Vector2(1, GameManager.randomMaze.height - 2);
+        transform.position = new Vector2(1, GameManager.randomMap.height - 2);
     }
     public void pause()
     {
@@ -42,51 +28,59 @@ public class PacStudentController : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D other) //all collisions pacStudent has with pellets and ghosts
     {
-       // if (Time.timeScale == 1) //only check collisions after the game start timer has finished and the game isn't paused anymore
-        {
             if (other.CompareTag("Pellet"))
             {
                 GameManager.audioManager.hitPellet();
-                GameManager.level1UIManager.statsManager.addScore(10, other.gameObject);
-                GameManager.level1UIManager.statsManager.removePellet();
+                GameManager.levelUIManager.statsManager.addScore(10, other.gameObject);
+                GameManager.levelUIManager.statsManager.removePellet();
             }
-            if (other.CompareTag("Cherry"))
+        if (other.CompareTag("Cherry"))
+        {
+            GameManager.levelUIManager.statsManager.addScore(100, other.gameObject);
+        }
+        else if (other.CompareTag("PowerPellet"))//if collide with pellet play the eatPellet audio and add score etc...
+        {
+            GameManager.audioManager.hitPellet();
+            foreach (GhostController ghost in GameManager.ghost1)
             {
-                GameManager.level1UIManager.statsManager.addScore(100, other.gameObject);
+                ghost.scared();
             }
-            else if (other.CompareTag("PowerPellet"))//if collide with pellet play the eatPellet audio and add score etc...
+            foreach (GhostController ghost in GameManager.ghost2)
             {
-                GameManager.audioManager.hitPellet();
-                GameManager.ghost1.scared();
-                GameManager.ghost2.scared();
-                GameManager.ghost3.scared();
-                GameManager.ghost4.scared();
-                GameManager.level1UIManager.statsManager.startScared();
-                GameManager.level1UIManager.statsManager.removePellet();
-                Destroy(other.gameObject);
+                ghost.scared();
             }
-            else if (other.CompareTag("Ghost"))
+            foreach (GhostController ghost in GameManager.ghost3)
             {
-                GhostController ghostController = other.gameObject.GetComponent<GhostController>();
-                if (ghostController.currState == (int)GhostController.CurrState.normal) //all code works execpt when pacman dies
-                {
-                    GameManager.level1UIManager.statsManager.removeLife();
-                    deathPartical.Play();
-                    deathPartical.transform.position = transform.position;
-                    transform.position = startPos;
-                    pause();
-                    tween = null;
-                }
-                else if (ghostController.currState == (int)GhostController.CurrState.scared || ghostController.currState == (int)GhostController.CurrState.recovery)
-                {
-                    GameManager.level1UIManager.statsManager.addScore(300, null);
-                    other.GetComponent<GhostController>().dead();
-                }
+                ghost.scared();
+            }
+            foreach (GhostController ghost in GameManager.ghost4)
+            {
+                ghost.scared();
+            }
+            GameManager.levelUIManager.statsManager.startScared();
+            GameManager.levelUIManager.statsManager.removePellet();
+            Destroy(other.gameObject);
+        }
+        else if (other.CompareTag("Ghost1") || other.CompareTag("Ghost2") || other.CompareTag("Ghost3") || other.CompareTag("Ghost4"))
+        {
+            GhostController ghostController = other.gameObject.GetComponent<GhostController>();
+            if (ghostController.currState == (int)GhostController.CurrState.normal) //all code works execpt when pacman dies
+            {
+                GameManager.levelUIManager.statsManager.removeLife();
+                deathPartical.Play();
+                deathPartical.transform.position = transform.position;
+                transform.position = startPos;
+                pause();
+                tween = null;
+            }
+            else if (ghostController.currState == (int)GhostController.CurrState.scared || ghostController.currState == (int)GhostController.CurrState.recovery)
+            {
+                GameManager.levelUIManager.statsManager.addScore(300, null);
+                other.GetComponent<GhostController>().dead();
             }
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
         determineKey();
@@ -101,7 +95,7 @@ public class PacStudentController : MonoBehaviour
 
     void determineKey()//get and save the last key that the player has pressed
     {
-        if (!GameManager.level1UIManager.statsManager.paused)
+        if (!GameManager.levelUIManager.statsManager.paused)
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
@@ -202,7 +196,7 @@ public class PacStudentController : MonoBehaviour
 
     void changePos() //move the player to the specified location
     {
-        if (!GameManager.level1UIManager.statsManager.paused)
+        if (!GameManager.levelUIManager.statsManager.paused)
         {
             float timeFraction = (Time.time - tween.StartTime) / tween.Duration;
             transform.position = Vector2.Lerp(tween.StartPos, tween.EndPos, timeFraction);

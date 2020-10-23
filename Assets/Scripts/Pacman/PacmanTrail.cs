@@ -8,7 +8,7 @@ public class PacmanTrail : MonoBehaviour
     }
     private void Update()
     {
-        if (!GameManager.level1UIManager.statsManager.paused)
+        if (!GameManager.levelUIManager.statsManager.paused)
         {
             if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.S))
             {

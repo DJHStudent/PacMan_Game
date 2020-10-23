@@ -38,7 +38,7 @@ public class CherryController : MonoBehaviour
     void changePos() //the actual movement of the cherry across the screen
     {
 
-        if (!GameManager.level1UIManager.statsManager.paused)
+        if (!GameManager.levelUIManager.statsManager.paused)
         {
             float timeFraction = (Time.time - tween.StartTime) / tween.Duration;
             cherryInstance.transform.position = Vector2.Lerp(tween.StartPos, tween.EndPos, timeFraction);

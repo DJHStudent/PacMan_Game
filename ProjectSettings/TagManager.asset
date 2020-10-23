@@ -9,8 +9,11 @@ TagManager:
   - PowerPellet
   - Teleport
   - Cherry
-  - Ghost
   - spawnOpening
+  - Ghost1
+  - Ghost2
+  - Ghost3
+  - Ghost4
   layers:
   - Default
   - TransparentFX
