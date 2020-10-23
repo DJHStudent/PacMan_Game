@@ -50,6 +50,7 @@ public class RandomSizeGenerator : MonoBehaviour
         makeTeloporters();       
         makePath();
         instanciateMap();
+        Ghost4Waypoints.currDir = Vector2.zero;
         wayPointStart.AddComponent<Ghost4Waypoints>();
     }
     void ghostSpawn() //generate the area for the ghosts to spawn in

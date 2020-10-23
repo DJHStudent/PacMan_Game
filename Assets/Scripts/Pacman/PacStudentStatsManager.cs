@@ -20,7 +20,6 @@ public class PacStudentStatsManager : MonoBehaviour
             pelletAmount = GameManager.levelGenerator.pelletAmount * 4 - 2;
         else if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
             pelletAmount = GameManager.randomMaze.pelletAmount;
-        Debug.Log(pelletAmount + "   " + GameManager.activeScene);
         StartCoroutine(startTimer()); 
         //InvokeRepeating("playTime", .01f, .01f);
     }

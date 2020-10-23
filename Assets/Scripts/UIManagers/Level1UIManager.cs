@@ -21,8 +21,11 @@ public class Level1UIManager : MonoBehaviour
     }
     public void setLives(int lives)
     {
-        Destroy(ghostLives[lives].gameObject);
-        ghostLives.RemoveAt(lives);
+        if (lives >= 0)
+        {
+            Destroy(ghostLives[lives].gameObject);
+            ghostLives.RemoveAt(lives);
+        }
     }
     public void setTime(string time)
     {

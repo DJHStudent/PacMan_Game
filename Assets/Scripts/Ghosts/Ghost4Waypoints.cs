@@ -11,11 +11,14 @@ public class Ghost4Waypoints : MonoBehaviour
     public GameObject nextObj;
     LayerMask wall, innerWall;
     public static Vector2 currDir;//stop backtracking being possible //also issue if on corner states it is valid when really shouldnt be
+    public static Sprite straightWall;
     void Start()
     {
         wall = 1 << 10;
-        innerWall |= 1 << 8;
+        innerWall = 1 << 8;
         innerWall |= 1 << 11;
+        if(straightWall == null)
+            straightWall = gameObject.GetComponent<SpriteRenderer>().sprite;
         nextWall(transform.position);
     }
     void posAccessible(Vector2 checkFromPos)
@@ -25,7 +28,7 @@ public class Ghost4Waypoints : MonoBehaviour
         RaycastHit2D checkRight = nextPosWall(nextObj.transform.position, Vector2.right, 1, innerWall);
         RaycastHit2D checkDown = nextPosWall(nextObj.transform.position, Vector2.down, 1, innerWall);
         //continually check until the next pos is a valid one then thats the next pos it will move towards
-        if (checkDown)
+        if (checkDown || !isStraightWall(nextObj))
             StartCoroutine(waitFrame());
         else if (checkLeft)
             StartCoroutine(waitFrame());
@@ -39,36 +42,35 @@ public class Ghost4Waypoints : MonoBehaviour
     public void nextWall(Vector2 checkFromPos)
     {
         RaycastHit2D hit = nextPosWall(checkFromPos,Vector2.up, 1, wall);
-        if (Vector2.up != -currDir && hit && !isCorner(hit.collider.gameObject) &&!hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
+        if (Vector2.up != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {
             nextObj = hit.collider.gameObject;
             currDir = Vector2.up;
-
             posAccessible(checkFromPos);
             return;
-        }    
-        hit = nextPosWall(checkFromPos, Vector2.right, 1, wall);
-        if (Vector2.right != -currDir && hit && !isCorner(hit.collider.gameObject) && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
-        {
-            nextObj = hit.collider.gameObject;
-            currDir = Vector2.right;
-            posAccessible(checkFromPos);
-            return;
-        }
+        }            
         hit = nextPosWall(checkFromPos, Vector2.down, 1, wall);
-        if (Vector2.down != -currDir && hit && !isCorner(hit.collider.gameObject) && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
+        if (Vector2.down != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {
             nextObj = hit.collider.gameObject;
             currDir = Vector2.down;
             posAccessible(checkFromPos);
             return;
         }
+        hit = nextPosWall(checkFromPos, Vector2.right, 1, wall);
+        if (Vector2.right != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
+        {
+            nextObj = hit.collider.gameObject;
+            currDir = Vector2.right;
+            posAccessible(checkFromPos);
+            return;
+        }
+
         hit = nextPosWall(checkFromPos, Vector2.left, 1, wall);
-        if (Vector2.left != -currDir && hit && !isCorner(hit.collider.gameObject) && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
+        if (Vector2.left != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {
             nextObj = hit.collider.gameObject;
             currDir = Vector2.left;
-
             posAccessible(checkFromPos);
             return;
         }
@@ -109,19 +111,21 @@ public class Ghost4Waypoints : MonoBehaviour
             return;
         }
     }
-    bool isCorner(GameObject nextObj)//checks if corner piece or not
+    bool isStraightWall(GameObject nextObj)//checks if corner piece or not
     {
-        return nextObj.name == "OutsideCornerPrefab(Clone)";
+        return nextObj.GetComponent<SpriteRenderer>().sprite == straightWall;
     }
     RaycastHit2D nextPosWall(Vector2 currPos, Vector2 nextPos, int dist, LayerMask layer) //checks if the next position the player is moving too is a wall
     {
         RaycastHit2D hit = Physics2D.Raycast(currPos, nextPos, dist, layer);
         return hit;
     }
-    IEnumerator waitFrame()
+
+    public IEnumerator waitFrame()
     {
         yield return new WaitForEndOfFrame();
-        nextWall(nextObj.transform.position);
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation || GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+            nextWall(nextObj.transform.position);
     }
 }
 

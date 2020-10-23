@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngineInternal;
 
 public class nextPos
 {
@@ -27,15 +29,19 @@ public class GhostController : MonoBehaviour
     Vector2 spawnPos, leftBasePos;
     public Vector2[] exitSpawnPos;
     public GameObject playerPos;
-    Vector2[] directions = { Vector2.up, Vector2.left, Vector2.right, Vector2.down};
+    Vector2[] directions = { Vector2.up, Vector2.left, Vector2.right, Vector2.down };
     bool inSpawn = true;
     public bool ghost1, ghost2, ghost3, ghost4;
+
+    bool notAtWall = true;
     [SerializeField]
     GameObject ghost4nextLocation; //get the next waypoint pos for ghost 4
     public LayerMask ignorePellet, spawnLayer, outerWalls;
 
-    public void scared() {
+    public void scared()
+    {
         currState = (int)CurrState.scared;
+        notAtWall = true;
         animator.SetTrigger("scared" + getDir());
         if (!GameManager.audioManager.isDeadState())
             GameManager.audioManager.scaredState();
@@ -108,7 +114,7 @@ public class GhostController : MonoBehaviour
         {
             transform.position = new Vector2(GameManager.randomMaze.width / 2, GameManager.randomMaze.height / 2);
             GameObject[] spawnOpenings = GameObject.FindGameObjectsWithTag("spawnOpening");
-            exitSpawnPos = new Vector2[] { spawnOpenings[0].transform.position, spawnOpenings[1].transform.position};
+            exitSpawnPos = new Vector2[] { spawnOpenings[0].transform.position, spawnOpenings[1].transform.position };
             ghost4nextLocation = GameManager.randomMaze.wayPointStart;
         }
         spawnPos = transform.position;
@@ -148,7 +154,7 @@ public class GhostController : MonoBehaviour
 
     void resetGhost()//if ghost back in spawn after being eaten
     {
-        GhostController[] allGhostStates = { GameManager.ghost1, GameManager.ghost2, GameManager.ghost3, GameManager.ghost4};
+        GhostController[] allGhostStates = { GameManager.ghost1, GameManager.ghost2, GameManager.ghost3, GameManager.ghost4 };
         int deadGhosts = 0;
         bool reset = false;//once ghost reset once don't do it again
         foreach (GhostController ghostState in allGhostStates) //check the current state of the other ghosts to see if they match and change accordingly
@@ -173,7 +179,7 @@ public class GhostController : MonoBehaviour
                 reset = true;
             }
         }
-        if(deadGhosts == 0)//if no other ghosts are dead reset the music as well(too the approprate state)
+        if (deadGhosts == 0)//if no other ghosts are dead reset the music as well(too the approprate state)
         {
             if (currState == (int)CurrState.normal)
                 GameManager.audioManager.normalState();
@@ -184,7 +190,7 @@ public class GhostController : MonoBehaviour
 
     Vector2 getNextPos()
     {
-        if(duration != .7f)
+        if (duration != .7f)
             duration = .7f;
 
         if (inSpawn) //have trigger determining if left spawn or not
@@ -192,7 +198,7 @@ public class GhostController : MonoBehaviour
             List<nextPos> validPos = ghost2NextPos(leftBasePos);
             return nextPosInfo(validPos);
         }
-        else if(currState == (int)CurrState.dead)
+        else if (currState == (int)CurrState.dead)
         {
             duration = 5f;
             return spawnPos;
@@ -202,7 +208,7 @@ public class GhostController : MonoBehaviour
             List<nextPos> validPos = ghost1NextPos(playerPos.transform.position);
             return nextPosInfo(validPos);
         }
-        else if(ghost3)
+        else if (ghost3)
         {
             List<nextPos> validPos = ghost3NextPos();
             return nextPosInfo(validPos);
@@ -267,25 +273,76 @@ public class GhostController : MonoBehaviour
         //add wall sensing later
         if (isDirSafe((int)CurrDir.up) && isCloser(currPos, currPos + directions[(int)CurrDir.up], target)) //if not backstepping && actually closer to target then next pos Valid
             nextPos.Add(addDir((int)CurrDir.up, currPos));
-        
+
         if (isDirSafe((int)CurrDir.left) && isCloser(currPos, currPos + directions[(int)CurrDir.left], target))
-            nextPos.Add(addDir((int)CurrDir.left, currPos)); 
-        
+            nextPos.Add(addDir((int)CurrDir.left, currPos));
+
         if (isDirSafe((int)CurrDir.right) && isCloser(currPos, currPos + directions[(int)CurrDir.right], target))
             nextPos.Add(addDir((int)CurrDir.right, currPos));
 
         if (isDirSafe((int)CurrDir.down) && isCloser(currPos, currPos + directions[(int)CurrDir.down], target))
             nextPos.Add(addDir((int)CurrDir.down, currPos));
+        if (ghost4)
+            Debug.Log(nextPos.Count);
         if (nextPos.Count == 0) //if no valid direction which is closer or == then choose a random valid direction
         {
             nextPos = ghost3NextPos();
         }
+        if (ghost4)
+            morePos = true;
         return nextPos;
+    }
+    bool morePos = true;
+    bool currentPos(Vector2 yPos)
+    {
+        return yPos.y > 10 || yPos.y < -6;
     }
     bool isCloser(Vector2 currPos, Vector2 nextPos, Vector2 target)
     {
+        float currXDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(currPos.x) - Mathf.Abs(target.x)));
+        float currYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(currPos.y) - Mathf.Abs(target.y)));
+        float nextXDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(nextPos.x) - Mathf.Abs(target.x)));
+        float nextYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(nextPos.y) - Mathf.Abs(target.y)));
+
         float currDist = Vector2.Distance(currPos, target);
-        return Vector2.Distance(nextPos, target) <= currDist;
+        if(ghost4 && !inSpawn && GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+        {
+            if (nextXDist == currXDist && nextYDist < currYDist && currentPos(currPos))
+            {
+                morePos = false;
+                return true;
+            }
+        }
+        ////////{
+        ////////    float currYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(target.y) - Mathf.Abs(currPos.y)));
+        ////////    float nextYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(target.y) - Mathf.Abs(nextPos.y)));
+        ////////    if (nextXDist < currYDist && nextXDist == currXDist)
+        ////////        return true;
+        ////////}
+        ////////if (ghost4 && !inSpawn)
+        ////////{
+        ////////  //  Debug.Log(currXDist + "  " + nextXDist + "  " + currYDist + "  " + nextYDist + "dir" + just);
+        ////////    if (nextXDist <= currXDist && nextYDist <= currYDist)// || nextXDist == currXDist && nextYDist < currYDist)
+        ////////    {
+        ////////        return true;
+        ////////    }
+        ////////}
+        return Vector2.Distance(nextPos, target) <= currDist && morePos;
+
+
+        ///////////    return nextXDist <= currXDist && nextYDist <= currYDist;// || nextXDist > currXDist && Vector2.Distance(nextPos, target) <= currDist || nextYDist > currYDist && Vector2.Distance(nextPos, target) <= currDist;
+        //////float currDist = Vector2.Distance(currPos, target);
+        /////// return Vector2.Distance(nextPos, target) <= currDist;
+
+        //////////////////////// int targetX = Mathf.RoundToInt(target.x), targetY = Mathf.RoundToInt(target.y);
+        ////////////////float currXDist = Mathf.Abs(currPos.x - targetX);
+        ////////////////float currYDist = Mathf.Abs(currPos.y - targetY);
+        //////////////////float currDist = Mathf.Sqrt(Mathf.Pow(currXDist, 2) + Mathf.Pow(currYDist, 2));
+
+        ////////////////float nextXDist = Mathf.Abs(nextPos.x - target.x);
+        ////////////////float nextYDist = Mathf.Abs(nextPos.y - target.y);
+        //////////////////  float nextDist = Mathf.Sqrt(Mathf.Pow(nextXDist, 2) + Mathf.Pow(nextYDist, 2));
+        ////////////////return nextXDist <= currXDist && nextYDist <= currYDist;
     }
 
     List<nextPos> ghost3NextPos()
@@ -308,24 +365,115 @@ public class GhostController : MonoBehaviour
         {
             nextPos.Add(new nextPos(getOppDir(), currPos - directions[currDir]));
         }
+        if (ghost4)
+            Debug.Log("Randomly moving");
 
         return nextPos;
     }
 
     List<nextPos> ghost4NextPos()
     {
+        //Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
+        //List<nextPos> nextPos = new List<nextPos>();
+        //if (ghost4nextLocation != null && Vector2.Distance(currPos, ghost4nextLocation.transform.position) > 2.05f)
+        //{
+        //    //if (notAtWall) //if away from wall as scared/ dead or just spawned in then continually check if touching a wall
+        //    //{
+        //    //    RaycastHit2D hitUp = Physics2D.Raycast(transform.position, Vector2.up, 1, outerWalls);
+        //    //    RaycastHit2D hitDown = Physics2D.Raycast(transform.position, Vector2.down, 1, outerWalls);
+        //    //    RaycastHit2D hitLeft = Physics2D.Raycast(transform.position, Vector2.left, 1, outerWalls);
+        //    //    RaycastHit2D hitRight = Physics2D.Raycast(transform.position, Vector2.right, 1, outerWalls);
+        //    //    if (hitUp && hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
+        //    //    {
+        //    //        ghost4nextLocation = hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
+        //    //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+        //    //        notAtWall = false;
+        //    //    }
+        //    //    else if (hitDown && hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
+        //    //    {
+        //    //        ghost4nextLocation = hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
+        //    //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+        //    //        notAtWall = false;
+        //    //    }
+        //    //    else if (hitLeft && hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
+        //    //    {
+        //    //        ghost4nextLocation = hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
+        //    //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+        //    //        notAtWall = false;
+        //    //    }
+        //    //    else if (hitRight && hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
+        //    //    {
+        //    //        ghost4nextLocation = hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
+        //    //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+        //    //        notAtWall = false;
+        //    //    }
+        //    //    else //not hit anywall
+        //    //        nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+        //    //}
+        //    //else
+        //        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+        //}
+        //else
+        //{
+        //    GameObject currWaypint = ghost4nextLocation;
+        //    ghost4nextLocation = currWaypint.GetComponent<Ghost4Waypoints>().nextObj;
+
+
+        //  //  while (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
+        //    //    ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
+        //    nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+
+        //}
+                    
+        //return nextPos;
+
+
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
         List<nextPos> nextPos = new List<nextPos>();
         if (ghost4nextLocation != null && Vector2.Distance(currPos, ghost4nextLocation.transform.position) > 2.05f)
         {
-            nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+            if (notAtWall) //if away from wall as scared/ dead or just spawned in then continually check if touching a wall
+            {
+                RaycastHit2D hitUp = Physics2D.Raycast(transform.position, Vector2.up, 1, outerWalls);
+                RaycastHit2D hitDown = Physics2D.Raycast(transform.position, Vector2.down, 1, outerWalls);
+                RaycastHit2D hitLeft = Physics2D.Raycast(transform.position, Vector2.left, 1, outerWalls);
+                RaycastHit2D hitRight = Physics2D.Raycast(transform.position, Vector2.right, 1, outerWalls);
+                if (hitUp && hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
+                {
+                    ghost4nextLocation = hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
+                    nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+                    notAtWall = false;
+                }
+                else if (hitDown && hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
+                {
+                    ghost4nextLocation = hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
+                    nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+                    notAtWall = false;
+                }
+                else if (hitLeft && hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
+                {
+                    ghost4nextLocation = hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
+                    nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+                    notAtWall = false;
+                }
+                else if (hitRight && hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
+                {
+                    ghost4nextLocation = hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
+                    nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+                    notAtWall = false;
+                }
+                else //not hit anywall
+                    nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+            }
+            else //not hit anywall
+                nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
         }
         else
         {
 
             {
-                ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-             
+                //ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
+
                 while (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
                     ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
             }
@@ -351,7 +499,7 @@ public class GhostController : MonoBehaviour
             case (int)CurrDir.down: return (int)CurrDir.up;
             case (int)CurrDir.up: return (int)CurrDir.down;
             case (int)CurrDir.left: return (int)CurrDir.right;
-            default: return (int)CurrDir.left; 
+            default: return (int)CurrDir.left;
         }
     }
 
@@ -376,3 +524,4 @@ public class GhostController : MonoBehaviour
         }
     }
 }
+
