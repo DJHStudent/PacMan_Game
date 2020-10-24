@@ -56,6 +56,7 @@ public class GhostController : MonoBehaviour
     public void dead()
     {
         currState = (int)CurrState.dead;
+        inSpawn = false;
         tween = null;
         setNextPos();
         animator.SetTrigger("dead");
@@ -290,14 +291,16 @@ public class GhostController : MonoBehaviour
         if (isDirSafe((int)CurrDir.up) && isCloser(currPos, currPos + directions[(int)CurrDir.up], target)) //if not backstepping && actually closer to target then next pos Valid
             nextPos.Add(addDir((int)CurrDir.up, currPos));
 
+        if (isDirSafe((int)CurrDir.down) && isCloser(currPos, currPos + directions[(int)CurrDir.down], target))
+            nextPos.Add(addDir((int)CurrDir.down, currPos));
+        
         if (isDirSafe((int)CurrDir.left) && isCloser(currPos, currPos + directions[(int)CurrDir.left], target))
             nextPos.Add(addDir((int)CurrDir.left, currPos));
 
         if (isDirSafe((int)CurrDir.right) && isCloser(currPos, currPos + directions[(int)CurrDir.right], target))
             nextPos.Add(addDir((int)CurrDir.right, currPos));
 
-        if (isDirSafe((int)CurrDir.down) && isCloser(currPos, currPos + directions[(int)CurrDir.down], target))
-            nextPos.Add(addDir((int)CurrDir.down, currPos));
+        
         if (nextPos.Count == 0) //if no valid direction which is closer or == then choose a random valid direction
         {
             nextPos = ghost3NextPos();
