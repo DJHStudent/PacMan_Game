@@ -316,11 +316,12 @@ public class GhostController : MonoBehaviour
     }
     bool isCloser(Vector2 currPos, Vector2 nextPos, Vector2 target)
     {
-        float currXDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(currPos.x) - Mathf.Abs(target.x)));
-        float currYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(currPos.y) - Mathf.Abs(target.y)));
-        float nextXDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(nextPos.x) - Mathf.Abs(target.x)));
-        float nextYDist = Mathf.RoundToInt(Mathf.Abs(Mathf.Abs(nextPos.y) - Mathf.Abs(target.y)));
+        float currXDist = Mathf.RoundToInt(Mathf.Abs(currPos.x - target.x));
+        float currYDist = Mathf.RoundToInt(Mathf.Abs(currPos.y - target.y));
+        float nextXDist = Mathf.RoundToInt(Mathf.Abs(nextPos.x - target.x));
+        float nextYDist = Mathf.RoundToInt(Mathf.Abs(nextPos.y - target.y));
 
+      //  float manhattanCurrDist = currXDist + currYDist, manhattanNextDist = nextXDist + nextYDist;
         float currDist = Vector2.Distance(currPos, target);
         if(ghost4 && !inSpawn && GameManager.activeScene == (int)GameManager.ActiveScene.recreation)//if on recreation scene and around the wall sticking out of border prefer to actually move up or down
         {
@@ -330,7 +331,7 @@ public class GhostController : MonoBehaviour
                 return true;
             }
         }
-        return Vector2.Distance(nextPos, target) <= currDist && morePos;
+        return Vector2.Distance(nextPos, target) <= currDist && morePos;//manhattanNextDist < manhattanCurrDist;
     }
 
     List<nextPos> ghost3NextPos()
