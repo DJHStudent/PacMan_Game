@@ -34,7 +34,7 @@ public class GhostController : MonoBehaviour
     [SerializeField]
     GameObject ghost4nextLocation; //get the next waypoint pos for ghost 4
     public LayerMask ignorePellet, spawnLayer, outerWalls;
-
+    APathfinding pathFinder;
     public void scared()
     {
         currState = (int)CurrState.scared;
@@ -103,6 +103,7 @@ public class GhostController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         animator.speed = 0;
+        pathFinder = GameObject.Find("SceneManager").GetComponent<APathfinding>();
     }
     public void initialize()
     {
@@ -288,26 +289,37 @@ public class GhostController : MonoBehaviour
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
         List<nextPos> nextPos = new List<nextPos>();//maybey change this here to a class with the nessesary info for directions as well as animation stuff
         //add wall sensing later
-        if (isDirSafe((int)CurrDir.up) && isCloser(currPos, currPos + directions[(int)CurrDir.up], target)) //if not backstepping && actually closer to target then next pos Valid
-            nextPos.Add(addDir((int)CurrDir.up, currPos));
-
-        if (isDirSafe((int)CurrDir.down) && isCloser(currPos, currPos + directions[(int)CurrDir.down], target))
-            nextPos.Add(addDir((int)CurrDir.down, currPos));
-        
-        if (isDirSafe((int)CurrDir.left) && isCloser(currPos, currPos + directions[(int)CurrDir.left], target))
-            nextPos.Add(addDir((int)CurrDir.left, currPos));
-
-        if (isDirSafe((int)CurrDir.right) && isCloser(currPos, currPos + directions[(int)CurrDir.right], target))
-            nextPos.Add(addDir((int)CurrDir.right, currPos));
-
-        
-        if (nextPos.Count == 0) //if no valid direction which is closer or == then choose a random valid direction
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
         {
-            nextPos = ghost3NextPos();
+            if (isDirSafe((int)CurrDir.up) && isCloser(currPos, currPos + directions[(int)CurrDir.up], target)) //if not backstepping && actually closer to target then next pos Valid
+                nextPos.Add(addDir((int)CurrDir.up, currPos));
+
+            if (isDirSafe((int)CurrDir.down) && isCloser(currPos, currPos + directions[(int)CurrDir.down], target))
+                nextPos.Add(addDir((int)CurrDir.down, currPos));
+
+            if (isDirSafe((int)CurrDir.left) && isCloser(currPos, currPos + directions[(int)CurrDir.left], target))
+                nextPos.Add(addDir((int)CurrDir.left, currPos));
+
+            if (isDirSafe((int)CurrDir.right) && isCloser(currPos, currPos + directions[(int)CurrDir.right], target))
+                nextPos.Add(addDir((int)CurrDir.right, currPos));
+
+
+            if (nextPos.Count == 0) //if no valid direction which is closer or == then choose a random valid direction
+            {
+                nextPos = ghost3NextPos();
+            }
+            if (ghost4)
+                morePos = true;
+            return nextPos;
         }
-        if (ghost4)
-            morePos = true;
-        return nextPos;
+        else
+        {
+            Node correctPos = pathFinder.pathFinder((int)transform.position.x, (int)transform.position.y, (int)target.x, (int)target.y);
+            //get direction from currPos and correctPos
+            //get direction from node and need use it to ensure ony moves to next position//need to convert direction to an int as well
+            nextPos.Add(addDir(1, currPos));
+            return nextPos;
+        }
     }
     bool morePos = true;
     bool currentPos(Vector2 yPos)

@@ -15,7 +15,7 @@ public class RandomMapGenerator : MonoBehaviour
     public GameObject ghost1, ghost2, ghost3, ghost4;
     public int ghost1Amount, ghost2Amount, ghost3Amount, ghost4Amount;
     bool pathStarted = false;
-    public int[,] map;
+    public Node[,] map;
     public int pelletAmount;
     enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner, teloBlocker, powerPellet };
     enum CurrDirection { Up, Down, Left, Right };
@@ -28,8 +28,19 @@ public class RandomMapGenerator : MonoBehaviour
     int wayPointX, wayPointY;
     void Start()
     {
-        map = new int[width, height];
+        map = new Node[width, height];
+        makeMap();
         generateMap();
+    }
+    void makeMap()//creates a new node at each position all with specified lications
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                map[i, j] = new Node(i, j);
+            }
+        }
     }
     void generateMap() //call all methods in turn to generate the map
     {
@@ -62,30 +73,30 @@ public class RandomMapGenerator : MonoBehaviour
         //make outside path around
         for (int i = 0; i < spawnWidth; i++)
         {
-            map[startX + i, startY] = (int)TileType.spawnEmpty;
+            map[startX + i, startY].tileType = (int)TileType.spawnEmpty;
         }
         for (int i = 0; i < spawnHeight; i++)
         {
-            map[startX, startY + i] = (int)TileType.spawnEmpty;
+            map[startX, startY + i].tileType = (int)TileType.spawnEmpty;
         }
         for (int i = 0; i < spawnWidth; i++)
         {
-            map[startX + i, startY + spawnHeight - 1] = (int)TileType.spawnEmpty;
+            map[startX + i, startY + spawnHeight - 1].tileType = (int)TileType.spawnEmpty;
         }
         for (int i = 0; i < spawnHeight; i++)
         {
-            map[startX + spawnWidth - 1, startY + i] = (int)TileType.spawnEmpty;
+            map[startX + spawnWidth - 1, startY + i].tileType = (int)TileType.spawnEmpty;
         }
         prevPos.Add(new prevPos(new Vector2(startX + 5, startY -2), Vector2.zero)); //do this so that if path cannot reach below normally still can generate one down their
        // Debug.Log(new Vector2(startX, startY - 2));
         for (int i = 2; i < spawnWidth - 2; i++)
         {
             for (int j = 2; j < spawnHeight - 2; j++)
-                map[startX+i, startY+j] = (int)TileType.spawnEmpty;
+                map[startX+i, startY+j].tileType = (int)TileType.spawnEmpty;
         }
         //make ghost exit
-        map[startX + 4, startY + spawnHeight - 2] = (int)TileType.spawnOpening;
-        map[startX + 5, startY + spawnHeight - 2] = (int)TileType.spawnOpening;
+        map[startX + 4, startY + spawnHeight - 2].tileType = (int)TileType.spawnOpening;
+        map[startX + 5, startY + spawnHeight - 2].tileType = (int)TileType.spawnOpening;
 
     }
     void makeTeloporters() //generate the two teloporters for pacStudent to use
@@ -98,7 +109,7 @@ public class RandomMapGenerator : MonoBehaviour
         makeWidthLine(1, startY + teloHeight, 0, teloWidth, (int)TileType.path);        
         for (int i = -1; i <= teloHeight; i++)
         {
-            map[6, startY + i] = (int)TileType.path;
+            map[6, startY + i].tileType = (int)TileType.path;
             joins.Add(new Vector2(6, startY + i));
         }
         //spawn actual paths right side
@@ -107,7 +118,7 @@ public class RandomMapGenerator : MonoBehaviour
 
         for (int i = -1; i <= teloHeight; i++)
         {
-            map[width- teloWidth -1, startY + i] = (int)TileType.path;
+            map[width- teloWidth -1, startY + i].tileType = (int)TileType.path;
             joins.Add(new Vector2(width - teloWidth -1, startY + i));
         }
 
@@ -133,40 +144,40 @@ public class RandomMapGenerator : MonoBehaviour
         makeWidthLine(0, startY + teloHeight - 1, width - teloWidth, teloWidth, (int)TileType.borderWall);
         //left walls
         for (int i = 1; i <= 3; i++)
-            map[teloWidth - 1, startY + i] = (int)TileType.borderWall;
+            map[teloWidth - 1, startY + i].tileType = (int)TileType.borderWall;
         for (int i = 1; i <= 3; i++)
-            map[teloWidth - 1, startY + 6 + i] = (int)TileType.borderWall;
+            map[teloWidth - 1, startY + 6 + i].tileType = (int)TileType.borderWall;
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < teloWidth - 1; j++)
-                map[j, startY + 1 + i] = (int)TileType.emptyOutside;
+                map[j, startY + 1 + i].tileType = (int)TileType.emptyOutside;
         }
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < teloWidth - 1; j++)
-                map[j, startY + 7 + i] = (int)TileType.emptyOutside;
+                map[j, startY + 7 + i].tileType = (int)TileType.emptyOutside;
         }
         //right walls
         for (int i = 1; i <= 3; i++)
-            map[width - teloWidth, startY + i] = (int)TileType.borderWall;
+            map[width - teloWidth, startY + i].tileType = (int)TileType.borderWall;
         for (int i = 1; i <= 3; i++)
-            map[width - teloWidth, startY + 6 + i] = (int)TileType.borderWall;
+            map[width - teloWidth, startY + 6 + i].tileType = (int)TileType.borderWall;
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < teloWidth - 1; j++)
-                map[width-j-1, startY + 1 + i] = (int)TileType.emptyOutside;
+                map[width-j-1, startY + 1 + i].tileType = (int)TileType.emptyOutside;
         }
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < teloWidth - 1; j++)
-                map[width-j-1, startY + 7 + i] = (int)TileType.emptyOutside;
+                map[width-j-1, startY + 7 + i].tileType = (int)TileType.emptyOutside;
         }
     }
     void makeWidthLine(int startPos, int startY, int startX, int teloWidth, int tileType)
     {
         for (int i = startPos; i < teloWidth; i++)
         {
-            map[startX + i, startY] = tileType;
+            map[startX + i, startY].tileType = tileType;
             if (tileType == (int)TileType.path || tileType == (int)TileType.powerPellet)
             {
                 joins.Add(new Vector2(startX + i, startY));
@@ -180,7 +191,7 @@ public class RandomMapGenerator : MonoBehaviour
             for (int j = 0; j < height; j++)
             {
                 if (i == 0 || i == width - 1 || j == 0 || j == height - 1)
-                    map[i, j] = (int)TileType.borderWall;
+                    map[i, j].tileType = (int)TileType.borderWall;
             }
         }
     }
@@ -190,7 +201,7 @@ public class RandomMapGenerator : MonoBehaviour
             prevPos.RemoveAt(prevPos.Count - 1);
         else
         {
-            map[1, height - 2] = (int)TileType.path;
+            map[1, height - 2].tileType = (int)TileType.path;
             currPos = new Vector2(1, height - 2);
         }
         List<Vector2> nextPos = validDirections();
@@ -201,7 +212,7 @@ public class RandomMapGenerator : MonoBehaviour
         {
             int rand = Random.Range(0, nextPos.Count);
             int posX = Mathf.RoundToInt(nextPos[rand].x), posY = Mathf.RoundToInt(nextPos[rand].y);
-            map[posX, posY] = (int)TileType.path;
+            map[posX, posY].tileType = (int)TileType.path;
             currDir = (nextPos[rand] - currPos).normalized;
             currPos = new Vector2(posX, posY);
             joins.Add(currPos);
@@ -223,61 +234,61 @@ public class RandomMapGenerator : MonoBehaviour
         {
             int posX = Mathf.RoundToInt(joins[i].x), posY = Mathf.RoundToInt(joins[i].y);
             //left
-            if (posX - 3 > 0 && map[posX - 1, posY] == (int)TileType.empty && map[posX - 2, posY] == (int)TileType.empty && canSpawnPath(posX - 3, posY)
-                && map[posX - 1, posY + 1] == (int)TileType.empty && map[posX - 1, posY + 2] == (int)TileType.empty &&
-                map[posX - 1, posY - 1] == (int)TileType.empty && map[posX - 1, posY - 2] == (int)TileType.empty
-                && map[posX - 2, posY + 1] == (int)TileType.empty && map[posX - 2, posY + 2] == (int)TileType.empty &&
-                map[posX - 2, posY - 1] == (int)TileType.empty && map[posX - 2, posY - 2] == (int)TileType.empty)
+            if (posX - 3 > 0 && map[posX - 1, posY].tileType == (int)TileType.empty && map[posX - 2, posY].tileType == (int)TileType.empty && canSpawnPath(posX - 3, posY)
+                && map[posX - 1, posY + 1].tileType == (int)TileType.empty && map[posX - 1, posY + 2].tileType == (int)TileType.empty &&
+                map[posX - 1, posY - 1].tileType == (int)TileType.empty && map[posX - 1, posY - 2].tileType == (int)TileType.empty
+                && map[posX - 2, posY + 1].tileType == (int)TileType.empty && map[posX - 2, posY + 2].tileType == (int)TileType.empty &&
+                map[posX - 2, posY - 1].tileType == (int)TileType.empty && map[posX - 2, posY - 2].tileType == (int)TileType.empty)
             {
-                map[posX - 1, posY] = (int)TileType.path;
-                map[posX - 2, posY] = (int)TileType.path;
+                map[posX - 1, posY].tileType = (int)TileType.path;
+                map[posX - 2, posY].tileType = (int)TileType.path;
             }
             //right
-            if (posX + 3 < width && map[posX + 1, posY] == (int)TileType.empty && map[posX + 2, posY] == (int)TileType.empty && canSpawnPath(posX + 3, posY)
-                && map[posX + 1, posY + 1] == (int)TileType.empty && map[posX + 1, posY + 2] == (int)TileType.empty &&
-                map[posX + 1, posY - 1] == (int)TileType.empty && map[posX + 1, posY - 2] == (int)TileType.empty
-                && map[posX + 2, posY + 1] == (int)TileType.empty && map[posX + 2, posY + 2] == (int)TileType.empty &&
-                map[posX + 2, posY - 1] == (int)TileType.empty && map[posX + 2, posY - 2] == (int)TileType.empty)
+            if (posX + 3 < width && map[posX + 1, posY].tileType == (int)TileType.empty && map[posX + 2, posY].tileType == (int)TileType.empty && canSpawnPath(posX + 3, posY)
+                && map[posX + 1, posY + 1].tileType == (int)TileType.empty && map[posX + 1, posY + 2].tileType == (int)TileType.empty &&
+                map[posX + 1, posY - 1].tileType == (int)TileType.empty && map[posX + 1, posY - 2].tileType == (int)TileType.empty
+                && map[posX + 2, posY + 1].tileType == (int)TileType.empty && map[posX + 2, posY + 2].tileType == (int)TileType.empty &&
+                map[posX + 2, posY - 1].tileType == (int)TileType.empty && map[posX + 2, posY - 2].tileType == (int)TileType.empty)
             {
-                map[posX + 1, posY] = (int)TileType.path;
-                map[posX + 2, posY] = (int)TileType.path;
+                map[posX + 1, posY].tileType = (int)TileType.path;
+                map[posX + 2, posY].tileType = (int)TileType.path;
             }
 
             //down
-            if (posY - 3 > 0 && map[posX, posY - 1] == (int)TileType.empty && map[posX, posY - 2] == (int)TileType.empty && canSpawnPath(posX, posY - 3)
-                && map[posX + 1, posY - 1] == (int)TileType.empty && map[posX + 2, posY - 1] == (int)TileType.empty &&
-                map[posX - 1, posY - 1] == (int)TileType.empty && map[posX - 2, posY - 1] == (int)TileType.empty
-                && map[posX + 1, posY - 2] == (int)TileType.empty && map[posX + 2, posY - 2] == (int)TileType.empty &&
-                map[posX - 1, posY - 2] == (int)TileType.empty && map[posX - 2, posY - 2] == (int)TileType.empty)
+            if (posY - 3 > 0 && map[posX, posY - 1].tileType == (int)TileType.empty && map[posX, posY - 2].tileType == (int)TileType.empty && canSpawnPath(posX, posY - 3)
+                && map[posX + 1, posY - 1].tileType == (int)TileType.empty && map[posX + 2, posY - 1].tileType == (int)TileType.empty &&
+                map[posX - 1, posY - 1].tileType == (int)TileType.empty && map[posX - 2, posY - 1].tileType == (int)TileType.empty
+                && map[posX + 1, posY - 2].tileType == (int)TileType.empty && map[posX + 2, posY - 2].tileType == (int)TileType.empty &&
+                map[posX - 1, posY - 2].tileType == (int)TileType.empty && map[posX - 2, posY - 2].tileType == (int)TileType.empty)
 
             {
-                map[posX, posY - 1] = (int)TileType.path;
-                map[posX, posY - 2] = (int)TileType.path;
+                map[posX, posY - 1].tileType = (int)TileType.path;
+                map[posX, posY - 2].tileType = (int)TileType.path;
             }
             //up
-            if (posY + 3 < height && map[posX, posY + 1] == (int)TileType.empty && map[posX, posY + 2] == (int)TileType.empty && canSpawnPath(posX, posY + 3)
-                && map[posX + 1, posY + 1] == (int)TileType.empty && map[posX + 2, posY + 1] == (int)TileType.empty &&
-                map[posX - 1, posY + 1] == (int)TileType.empty && map[posX - 2, posY + 1] == (int)TileType.empty
-                && map[posX + 1, posY + 2] == (int)TileType.empty && map[posX + 2, posY + 2] == (int)TileType.empty &&
-                map[posX - 1, posY + 2] == (int)TileType.empty && map[posX - 2, posY + 2] == (int)TileType.empty)
+            if (posY + 3 < height && map[posX, posY + 1].tileType == (int)TileType.empty && map[posX, posY + 2].tileType == (int)TileType.empty && canSpawnPath(posX, posY + 3)
+                && map[posX + 1, posY + 1].tileType == (int)TileType.empty && map[posX + 2, posY + 1].tileType == (int)TileType.empty &&
+                map[posX - 1, posY + 1].tileType == (int)TileType.empty && map[posX - 2, posY + 1].tileType == (int)TileType.empty
+                && map[posX + 1, posY + 2].tileType == (int)TileType.empty && map[posX + 2, posY + 2].tileType == (int)TileType.empty &&
+                map[posX - 1, posY + 2].tileType == (int)TileType.empty && map[posX - 2, posY + 2].tileType == (int)TileType.empty)
 
             {
-                map[posX, posY + 1] = (int)TileType.path;
-                map[posX, posY + 2] = (int)TileType.path;
+                map[posX, posY + 1].tileType = (int)TileType.path;
+                map[posX, posY + 2].tileType = (int)TileType.path;
             }
 
         }
     }
     bool canSpawnPath(int posX, int posY)
     {
-        return isPath(posX, posY) || map[posX, posY] == (int)TileType.spawnEmpty;
+        return isPath(posX, posY) || map[posX, posY].tileType == (int)TileType.spawnEmpty;
     }
     List<Vector2> validDirections()
     {
         List<Vector2> directions = new List<Vector2>();
         //up, down, left, right
         int posX = Mathf.RoundToInt(currPos.x), posY = Mathf.RoundToInt(currPos.y);
-        if (map[posX - 1, posY] == (int)TileType.empty && checkLeft(posX - 1, posY) && checkDown(posX - 1, posY) && checkUp(posX - 1, posY))//check left
+        if (map[posX - 1, posY].tileType == (int)TileType.empty && checkLeft(posX - 1, posY) && checkDown(posX - 1, posY) && checkUp(posX - 1, posY))//check left
         {
             directions.Add(new Vector2(posX - 1, posY));
             if (currDir == Vector2.left)
@@ -288,7 +299,7 @@ public class RandomMapGenerator : MonoBehaviour
                 directions.Add(new Vector2(posX - 1, posY));
             }
         }
-        if (map[posX + 1, posY] == (int)TileType.empty && checkRight(posX + 1, posY) && checkDown(posX + 1, posY) && checkUp(posX + 1, posY)) //check right
+        if (map[posX + 1, posY].tileType == (int)TileType.empty && checkRight(posX + 1, posY) && checkDown(posX + 1, posY) && checkUp(posX + 1, posY)) //check right
         {
             directions.Add(new Vector2(posX + 1, posY));
             if (currDir == Vector2.right)
@@ -299,7 +310,7 @@ public class RandomMapGenerator : MonoBehaviour
                 directions.Add(new Vector2(posX + 1, posY));
             }
         }
-        if (map[posX, posY + 1] == (int)TileType.empty && checkUp(posX, posY + 1) && checkLeft(posX, posY + 1) && checkRight(posX, posY + 1)) //check up
+        if (map[posX, posY + 1].tileType == (int)TileType.empty && checkUp(posX, posY + 1) && checkLeft(posX, posY + 1) && checkRight(posX, posY + 1)) //check up
         {
             directions.Add(new Vector2(posX, posY + 1));
             if (currDir == Vector2.up)
@@ -310,7 +321,7 @@ public class RandomMapGenerator : MonoBehaviour
                 directions.Add(new Vector2(posX, posY + 1));
             }
         }
-        if (map[posX, posY - 1] == (int)TileType.empty && checkDown(posX, posY - 1) && checkLeft(posX, posY - 1) && checkRight(posX, posY - 1)) //check down
+        if (map[posX, posY - 1].tileType == (int)TileType.empty && checkDown(posX, posY - 1) && checkLeft(posX, posY - 1) && checkRight(posX, posY - 1)) //check down
         {
             directions.Add(new Vector2(posX, posY - 1));
             if (currDir == Vector2.down)
@@ -325,50 +336,50 @@ public class RandomMapGenerator : MonoBehaviour
     }
     bool checkRight(int posX, int posY) //check straight up as well as the diagonals ,x+2 etc
     {           
-        if (posX + 2 < width && map[posX + 2, posY] != (int)TileType.empty && map[posX + 2, posY] != (int)TileType.borderWall)//check up
+        if (posX + 2 < width && map[posX + 2, posY].tileType != (int)TileType.empty && map[posX + 2, posY].tileType != (int)TileType.borderWall)//check up
                 return false;
         
-        if (posX + 1 < width && map[posX + 1, posY] != (int)TileType.empty && map[posX + 1, posY] != (int)TileType.borderWall)//check up
+        if (posX + 1 < width && map[posX + 1, posY].tileType != (int)TileType.empty && map[posX + 1, posY].tileType != (int)TileType.borderWall)//check up
                 return false;
         if (currDir != Vector2.left)
         {
 
-            if (posX + 2 < width && posY + 1 < height && map[posX + 2, posY + 1] != (int)TileType.empty && map[posX + 2, posY + 1] != (int)TileType.borderWall)//check up
+            if (posX + 2 < width && posY + 1 < height && map[posX + 2, posY + 1].tileType != (int)TileType.empty && map[posX + 2, posY + 1].tileType != (int)TileType.borderWall)//check up
                 return false;
-            if (posX + 2 < width && posY - 1 > 0 && map[posX + 2, posY - 1] != (int)TileType.empty && map[posX + 2, posY - 1] != (int)TileType.borderWall)//check up
+            if (posX + 2 < width && posY - 1 > 0 && map[posX + 2, posY - 1].tileType != (int)TileType.empty && map[posX + 2, posY - 1].tileType != (int)TileType.borderWall)//check up
                 return false;
         }
         return true;
     }
     bool checkLeft(int posX, int posY) //check straight up as well as the diagonals ,x+2 etc
     {            
-        if (posX - 2 > 0 && map[posX - 2, posY] != (int)TileType.empty && map[posX - 2, posY] != (int)TileType.borderWall)//check up
+        if (posX - 2 > 0 && map[posX - 2, posY].tileType != (int)TileType.empty && map[posX - 2, posY].tileType != (int)TileType.borderWall)//check up
                 return false;
         
-        if (posX - 1 > 0 && map[posX - 1, posY] != (int)TileType.empty && map[posX - 1, posY] != (int)TileType.borderWall)//check up
+        if (posX - 1 > 0 && map[posX - 1, posY].tileType != (int)TileType.empty && map[posX - 1, posY].tileType != (int)TileType.borderWall)//check up
                 return false;
         if (currDir != Vector2.right)
         {
 
             //diagonal
-            if (posX - 2 > 0 && posY + 1 < height && map[posX - 2, posY + 1] != (int)TileType.empty && map[posX - 2, posY + 1] != (int)TileType.borderWall)//check up
+            if (posX - 2 > 0 && posY + 1 < height && map[posX - 2, posY + 1].tileType != (int)TileType.empty && map[posX - 2, posY + 1].tileType != (int)TileType.borderWall)//check up
                 return false;
-            if (posX - 2 > 0 && posY - 1 > 0 && map[posX - 2, posY - 1] != (int)TileType.empty && map[posX - 2, posY - 1] != (int)TileType.borderWall)//check up
+            if (posX - 2 > 0 && posY - 1 > 0 && map[posX - 2, posY - 1].tileType != (int)TileType.empty && map[posX - 2, posY - 1].tileType != (int)TileType.borderWall)//check up
                 return false;
         }
         return true;
     }
     bool checkDown(int posX, int posY) //check straight up as well as the diagonals ,x+2 etc
     {            
-        if (posY - 2 > 0 && map[posX, posY - 2] != (int)TileType.empty && map[posX, posY - 2] != (int)TileType.borderWall)//check up
+        if (posY - 2 > 0 && map[posX, posY - 2].tileType != (int)TileType.empty && map[posX, posY - 2].tileType != (int)TileType.borderWall)//check up
                 return false;
-        if (posY - 1 > 0 && map[posX, posY - 1] != (int)TileType.empty && map[posX, posY - 1] != (int)TileType.borderWall)//check up
+        if (posY - 1 > 0 && map[posX, posY - 1].tileType != (int)TileType.empty && map[posX, posY - 1].tileType != (int)TileType.borderWall)//check up
             return false;
         if (currDir != Vector2.up)
         {
-            if (posY - 2 > 0 && posX + 1 < width && map[posX + 1, posY - 2] != (int)TileType.empty && map[posX + 1, posY - 2] != (int)TileType.borderWall)//check up
+            if (posY - 2 > 0 && posX + 1 < width && map[posX + 1, posY - 2].tileType != (int)TileType.empty && map[posX + 1, posY - 2].tileType != (int)TileType.borderWall)//check up
                 return false;
-            if (posY - 2 > 0 && posX - 1 > 0 && map[posX - 1, posY - 2] != (int)TileType.empty && map[posX - 1, posY - 2] != (int)TileType.borderWall)//check up
+            if (posY - 2 > 0 && posX - 1 > 0 && map[posX - 1, posY - 2].tileType != (int)TileType.empty && map[posX - 1, posY - 2].tileType != (int)TileType.borderWall)//check up
                 return false;
         }
         return true;
@@ -376,15 +387,15 @@ public class RandomMapGenerator : MonoBehaviour
     bool checkUp(int posX, int posY) //check straight up as well as the diagonals ,x+2 etc
     {      
         
-        if (posY + 2 < height && map[posX, posY + 2] != (int)TileType.empty && map[posX, posY + 2] != (int)TileType.borderWall)//check up
+        if (posY + 2 < height && map[posX, posY + 2].tileType != (int)TileType.empty && map[posX, posY + 2].tileType != (int)TileType.borderWall)//check up
                 return false;
-        if (posY + 1 < height && map[posX, posY + 1] != (int)TileType.empty && map[posX, posY + 1] != (int)TileType.borderWall)//check up
+        if (posY + 1 < height && map[posX, posY + 1].tileType != (int)TileType.empty && map[posX, posY + 1].tileType != (int)TileType.borderWall)//check up
                 return false;
         if (currDir != Vector2.down)
         {
-            if (posY + 2 < height && posX + 1 < width && map[posX + 1, posY + 2] != (int)TileType.empty && map[posX + 1, posY + 2] != (int)TileType.borderWall)//check up
+            if (posY + 2 < height && posX + 1 < width && map[posX + 1, posY + 2].tileType != (int)TileType.empty && map[posX + 1, posY + 2].tileType != (int)TileType.borderWall)//check up
                 return false;
-            if (posY + 2 < height && posX - 1 > 0 && map[posX - 1, posY + 2] != (int)TileType.empty && map[posX - 1, posY + 2] != (int)TileType.borderWall)//check up
+            if (posY + 2 < height && posX - 1 > 0 && map[posX - 1, posY + 2].tileType != (int)TileType.empty && map[posX - 1, posY + 2].tileType != (int)TileType.borderWall)//check up
                 return false;
         }
         return true;
@@ -395,15 +406,15 @@ public class RandomMapGenerator : MonoBehaviour
         {
             for (int j = 0; j < height; j++)
             {
-                int mapValue = map[i, j];
-                if (map[i, j] == (int)TileType.path)
+                int mapValue = map[i, j].tileType;
+                if (map[i, j].tileType == (int)TileType.path)
                 {
                     pelletAmount++;
                     int rand = Random.Range(0, 50);
                     if (rand == 0 && i != 1 && j != height - 2) //randomly choose if a pellet should be a power pellet or not never putting one at the players start pos
                     {
-                        map[i, j] = (int)TileType.powerPellet;
-                        mapValue = map[i, j];
+                        map[i, j].tileType = (int)TileType.powerPellet;
+                        mapValue = map[i, j].tileType;
                     }
                 }
                 if (mapValue != (int)TileType.spawnEmpty)
@@ -414,7 +425,7 @@ public class RandomMapGenerator : MonoBehaviour
                     else
                     {
                         rote = determineRote(i, j);
-                        mapValue = map[i, j];
+                        mapValue = map[i, j].tileType;
                     }
                     if(i == wayPointX && j == wayPointY) //if at the waypint start position then set this as the start position for the waypoint system
                         wayPointStart = Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform);
@@ -459,7 +470,7 @@ public class RandomMapGenerator : MonoBehaviour
         {
             if (diagWallCount == 4) 
             {
-                map[i, j] = (int)TileType.emptyInside;
+                map[i, j].tileType = (int)TileType.emptyInside;
                 return Quaternion.identity;
             }
             else if(diagWallCount == 3)
@@ -526,17 +537,17 @@ public class RandomMapGenerator : MonoBehaviour
     bool checkWallType(int i, int j)
     {
         bool safe = i >= 0 && j >= 0 && i < width && j < height;
-        return safe && !isPath(i,j) && map[i, j] != (int)TileType.spawnEmpty && map[i, j] != (int)TileType.spawnOpening && map[i, j] != (int)TileType.emptyOutside;
+        return safe && !isPath(i,j) && map[i, j].tileType != (int)TileType.spawnEmpty && map[i, j].tileType != (int)TileType.spawnOpening && map[i, j].tileType != (int)TileType.emptyOutside;
     }
     void checkCornerType(int i, int j)
     {
-        if (map[i, j] == (int)TileType.borderWall)
-            map[i, j] = (int)TileType.outsideCorner;
+        if (map[i, j].tileType == (int)TileType.borderWall)
+            map[i, j].tileType = (int)TileType.outsideCorner;
         else
-            map[i, j] = (int)TileType.insideCorner;
+            map[i, j].tileType = (int)TileType.insideCorner;
     }
     bool isPath(int i, int j)
     {
-        return map[i, j] == (int)TileType.powerPellet || map[i, j] == (int)TileType.path;
+        return map[i, j].tileType == (int)TileType.powerPellet || map[i, j].tileType == (int)TileType.path;
     }
 }
