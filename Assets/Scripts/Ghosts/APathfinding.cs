@@ -35,30 +35,45 @@ public class APathfinding : MonoBehaviour
     List<Node> openNodes = new List<Node>();
     List<Node> closedNodes = new List<Node>();
     Node[,] map;
-
+    Node lowest()
+    {
+        Node current = openNodes[0];
+        foreach (Node node in openNodes)
+        {
+            if (node.fCost() < current.fCost())
+                current = node;
+        }
+        return current;
+    }//way code works the target for ghost 4 is always unreachable so need determine way around(likely through using distances from block)
     public Node pathFinder(int startX, int startY, int targetX, int targetY)
     {
+        openNodes.Clear();
+        closedNodes.Clear();
         map = GameManager.randomMap.map;
         map[startX, startY].gCost = 0;
         map[startX, startY].hCost = targetDist(startX, startY, targetX, targetY);
-        map[startX, startY].parentNode = null;
+        map[startX, startY].parentNode = map[startX, startY];
 
 
         openNodes.Add(map[startX, startY]);//new Node(0, , startX, startY, startX, startY));
         while (openNodes.Count > 0)
         {
-            Node current = openNodes[0];
+            Node current = lowest();//dont I need to pick one with lowest fcost
             openNodes.Remove(current);
             closedNodes.Add(current);
-            if (current.currentX == targetX && current.currentY == targetY)
+            if (current.currentX == targetX && current.currentY == targetY)//not work right as when calculate path wrong so need change target || Vector2.Distance(new Vector2(targetX, targetY), new Vector2(current.currentX, current.currentY)) <= 2)
             {
                 return recalcPath(startX, startY, targetX, targetY);
             }
             List<Node> neighbourNodes = new List<Node>();//add the nodes from the map with new values
-            neighbourNodes.Add(map[current.currentX + 1, current.currentY]);
-            neighbourNodes.Add(map[current.currentX - 1, current.currentY]);
-            neighbourNodes.Add(map[current.currentX, current.currentY + 1]);
-            neighbourNodes.Add(map[current.currentX, current.currentY - 1]);
+            if (current.currentX + 1 < GameManager.randomMap.width)//if tile involves backtracking don't move their
+                neighbourNodes.Add(map[current.currentX + 1, current.currentY]);
+            if(current.currentX - 1 >= 0)
+                neighbourNodes.Add(map[current.currentX - 1, current.currentY]);
+            if (current.currentY + 1 < GameManager.randomMap.height)
+                neighbourNodes.Add(map[current.currentX, current.currentY + 1]);
+            if (current.currentY - 1 >= 0)
+                neighbourNodes.Add(map[current.currentX, current.currentY - 1]);
 
             //////////add Right
             ////////neighbourNodes.Add(new Node(current.gCost + distToNode, targetDist(current.currentX + 1, current.currentY), current.currentX, current.currentY, current.currentX + 1, current.currentY));
@@ -72,7 +87,9 @@ public class APathfinding : MonoBehaviour
             foreach (Node currNeighbour in neighbourNodes)
             {
                 if (!validPath(currNeighbour.currentX, currNeighbour.currentY) || closedNodes.Contains(currNeighbour))
+                {
                     continue; //if node already checked or not valid go to next node
+                }
 
                 int newMovementCostNeighbour = current.gCost + distToNode;
                 if (!openNodes.Contains(currNeighbour) || newMovementCostNeighbour < currNeighbour.gCost)
@@ -84,25 +101,37 @@ public class APathfinding : MonoBehaviour
                     {
                         openNodes.Add(currNeighbour);
                     }
+                   // map[currNeighbour.currentX, currNeighbour.currentY] = currNeighbour;
                 }
 
-            }
-            
+            }            
         }return null;//no path found
     }
     Node recalcPath(int startX, int startY, int targetX, int targetY)
     {
         Node current = map[targetX, targetY];
+        List<Node> path = new List<Node>();
         while (current != map[startX, startY])
         {
+            path.Add(current);
             current = current.parentNode;
         }
-        return current;//in theory just returns start node always
+        return path[path.Count - 1];//issue if trying it and on the target path already
+    }
+
+    bool inList(Node node, List<Node> nodeList)
+    {
+        foreach (Node nodeitem in nodeList)
+        {
+            if (nodeitem.currentX == node.currentX && nodeitem.currentY == node.currentY)
+                return true;
+        }
+        return false;
     }
 
     bool validPath(int currX, int currY)
     {
-        return map[currX, currY].tileType == 1 || map[currX, currY].tileType == 11;
+        return map[currX, currY].tileType == 1 || map[currX, currY].tileType == 11 || map[currX, currY].tileType == 4;
     }
 
     int targetDist(int currentX, int currentY, int targetX, int targetY)

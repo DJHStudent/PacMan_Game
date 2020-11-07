@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 
 public class nextPos
@@ -289,7 +290,7 @@ public class GhostController : MonoBehaviour
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
         List<nextPos> nextPos = new List<nextPos>();//maybey change this here to a class with the nessesary info for directions as well as animation stuff
         //add wall sensing later
-        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation || inSpawn)
         {
             if (isDirSafe((int)CurrDir.up) && isCloser(currPos, currPos + directions[(int)CurrDir.up], target)) //if not backstepping && actually closer to target then next pos Valid
                 nextPos.Add(addDir((int)CurrDir.up, currPos));
@@ -316,8 +317,23 @@ public class GhostController : MonoBehaviour
         {
             Node correctPos = pathFinder.pathFinder((int)transform.position.x, (int)transform.position.y, (int)target.x, (int)target.y);
             //get direction from currPos and correctPos
+            Vector2 dir = (new Vector2(correctPos.currentX, correctPos.currentY) - currPos).normalized;
+            int directionValue;
+            // switch (dir)    // enum CurrDir { up, left, right, down };
+            // {
+            //   case Vector2.up: directionValue = 0;
+            //   default: directionValue = 3;
+            // }
+            if (dir == Vector2.up)
+                directionValue = 0; 
+            else if (dir == Vector2.left)
+                directionValue = 1; 
+            else if (dir == Vector2.right)
+                directionValue = 2; 
+            else
+                directionValue = 3;
             //get direction from node and need use it to ensure ony moves to next position//need to convert direction to an int as well
-            nextPos.Add(addDir(1, currPos));
+            nextPos.Add(addDir(directionValue, currPos));
             return nextPos;
         }
     }
