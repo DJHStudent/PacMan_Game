@@ -38,11 +38,14 @@ public class GhostController : MonoBehaviour
     APathfinding pathFinder;
     public void scared()
     {
-        currState = (int)CurrState.scared;
-        notAtWall = true;
-        animator.SetTrigger("scared" + getDir());
-        if (!GameManager.audioManager.isDeadState())
-            GameManager.audioManager.scaredState();
+        if (currState != (int)CurrState.dead)
+        {
+            currState = (int)CurrState.scared;
+            notAtWall = true;
+            animator.SetTrigger("scared" + getDir());
+            if (!GameManager.audioManager.isDeadState())
+                GameManager.audioManager.scaredState();
+        }
     }
 
     public void recovery()
@@ -315,25 +318,32 @@ public class GhostController : MonoBehaviour
         }
         else
         {
-            Node correctPos = pathFinder.pathFinder((int)transform.position.x, (int)transform.position.y, (int)target.x, (int)target.y);
+            Node correctPos = pathFinder.pathFinder((int)transform.position.x, (int)transform.position.y, (int)target.x, (int)target.y, directions[currDir]);
             //get direction from currPos and correctPos
-            Vector2 dir = (new Vector2(correctPos.currentX, correctPos.currentY) - currPos).normalized;
-            int directionValue;
-            // switch (dir)    // enum CurrDir { up, left, right, down };
-            // {
-            //   case Vector2.up: directionValue = 0;
-            //   default: directionValue = 3;
-            // }
-            if (dir == Vector2.up)
-                directionValue = 0; 
-            else if (dir == Vector2.left)
-                directionValue = 1; 
-            else if (dir == Vector2.right)
-                directionValue = 2; 
+            if (correctPos != null)
+            {
+                Vector2 dir = (new Vector2(correctPos.currentX, correctPos.currentY) - currPos).normalized;
+                int directionValue;
+                // switch (dir)    // enum CurrDir { up, left, right, down };
+                // {
+                //   case Vector2.up: directionValue = 0;
+                //   default: directionValue = 3;
+                // }
+                if (dir == Vector2.up)
+                    directionValue = 0;
+                else if (dir == Vector2.left)
+                    directionValue = 1;
+                else if (dir == Vector2.right)
+                    directionValue = 2;
+                else
+                    directionValue = 3;
+                //get direction from node and need use it to ensure ony moves to next position//need to convert direction to an int as well
+                nextPos.Add(addDir(directionValue, currPos));
+            }
             else
-                directionValue = 3;
-            //get direction from node and need use it to ensure ony moves to next position//need to convert direction to an int as well
-            nextPos.Add(addDir(directionValue, currPos));
+            {
+                nextPos = ghost3NextPos();
+            }
             return nextPos;
         }
     }
@@ -388,6 +398,7 @@ public class GhostController : MonoBehaviour
     {
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
         List<nextPos> nextPos = new List<nextPos>();
+        Vector2 pathNextPos;
         if (ghost4nextLocation != null && Vector2.Distance(currPos, ghost4nextLocation.transform.position) > 2.05f)
         {
             if (notAtWall) //if away from wall as scared/ dead or just spawned in then continually check if touching a wall
@@ -399,40 +410,117 @@ public class GhostController : MonoBehaviour
                 if (hitUp && hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
                 {
                     ghost4nextLocation = hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-                    nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    {
+                        pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
+                        nextPos = ghost2NextPos(pathNextPos);
+                    }
+                    else
+                        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
                     notAtWall = false;
                 }
                 else if (hitDown && hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
                 {
                     ghost4nextLocation = hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-                    nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    {
+                        pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
+                        nextPos = ghost2NextPos(pathNextPos);
+                    }
+                    else
+                        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
                     notAtWall = false;
                 }
                 else if (hitLeft && hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
                 {
                     ghost4nextLocation = hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-                    nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    {
+                        pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
+                        nextPos = ghost2NextPos(pathNextPos);
+                    }
+                    else
+                        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
                     notAtWall = false;
                 }
                 else if (hitRight && hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
                 {
                     ghost4nextLocation = hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-                    nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    {
+                        pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
+                        nextPos = ghost2NextPos(pathNextPos);
+                    }
+                    else
+                        nextPos = ghost2NextPos(ghost4nextLocation.transform.position);
                     notAtWall = false;
                 }
                 else //not hit anywall
-                    nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+                {
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    {
+                        pathNextPos = determineNextPos(ghost4nextLocation.transform.position);//need to set ghost waypoint here?
+                        nextPos = ghost2NextPos(pathNextPos);
+                    }
+                    else
+                        nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+                  //  ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
+                }
             }
             else //not hit anywall
-                nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+            {
+                if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                {
+                    pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
+                    nextPos = ghost2NextPos(pathNextPos);
+                }
+                else
+                    nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+               // ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
+            }
         }
         else
         {
                 while (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
                     ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-            nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+            if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+            {
+                pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
+                nextPos = ghost2NextPos(pathNextPos);
+            }
+            else
+                nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
+           // ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
         }
+        //check here
+      //  if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+        //    nextPos[0].pos = determineNextPos(nextPos[0].pos);
         return nextPos;
+    }
+    Vector2 determineNextPos(Vector2 pos)
+    {
+        Node[,] map = GameManager.randomMap.map;
+        //right
+        if ((int)pos.x + 1 < GameManager.randomMap.width)
+        {
+            if (map[(int)pos.x + 1, (int)pos.y].tileType == 1 || map[(int)pos.x + 1, (int)pos.y].tileType == 11 || map[(int)pos.x + 1, (int)pos.y].tileType == 4)
+                return new Vector2((int)pos.x + 1, (int)pos.y);
+        }
+        //left
+        if ((int)pos.x - 1 >= 0)
+        {
+            if (map[(int)pos.x - 1, (int)pos.y].tileType == 1 || map[(int)pos.x - 1, (int)pos.y].tileType == 11 || map[(int)pos.x - 1, (int)pos.y].tileType == 4)
+                return new Vector2((int)pos.x - 1, (int)pos.y);
+        }
+        //up
+        if ((int)pos.y + 1 < GameManager.randomMap.height)
+        {
+            if (map[(int)pos.x, (int)pos.y + 1].tileType == 1 || map[(int)pos.x, (int)pos.y + 1].tileType == 11 || map[(int)pos.x, (int)pos.y + 1].tileType == 4)
+                return new Vector2((int)pos.x, (int)pos.y + 1);
+        }
+        //down
+        // (map[(int)pos.x, (int)pos.y + 1].tileType == 1 || map[(int)pos.x, (int)pos.y + 1].tileType == 11 || map[(int)pos.x, (int)pos.y + 1].tileType == 4)
+            return new Vector2((int)pos.x, (int)pos.y - 1);
     }
     bool isDirSafe(int dir) //checks if the next direction is possible(not wall and not involve backtracking)
     {

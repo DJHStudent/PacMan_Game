@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using UnityEngine;
 
 public class APathfinding : MonoBehaviour
@@ -35,6 +36,8 @@ public class APathfinding : MonoBehaviour
     List<Node> openNodes = new List<Node>();
     List<Node> closedNodes = new List<Node>();
     Node[,] map;
+    Node current;
+    Vector2 lastDirection;
     Node lowest()
     {
         Node current = openNodes[0];
@@ -45,7 +48,7 @@ public class APathfinding : MonoBehaviour
         }
         return current;
     }//way code works the target for ghost 4 is always unreachable so need determine way around(likely through using distances from block)
-    public Node pathFinder(int startX, int startY, int targetX, int targetY)
+    public Node pathFinder(int startX, int startY, int targetX, int targetY, Vector2 currDir)
     {
         openNodes.Clear();
         closedNodes.Clear();
@@ -58,21 +61,24 @@ public class APathfinding : MonoBehaviour
         openNodes.Add(map[startX, startY]);//new Node(0, , startX, startY, startX, startY));
         while (openNodes.Count > 0)
         {
-            Node current = lowest();//dont I need to pick one with lowest fcost
+            Node lastCurrent = current;
+            current = lowest();//dont I need to pick one with lowest fcost
+            ////////////////////////////////if(lastCurrent != null)
+            ////////////////////////////////    lastDirection = (new Vector2(current.currentX, current.currentY) - new Vector2(lastCurrent.currentX, lastCurrent.currentY)).normalized;
             openNodes.Remove(current);
             closedNodes.Add(current);
-            if (current.currentX == targetX && current.currentY == targetY)//not work right as when calculate path wrong so need change target || Vector2.Distance(new Vector2(targetX, targetY), new Vector2(current.currentX, current.currentY)) <= 2)
+            if (current.currentX == targetX && current.currentY == targetY)// || Vector2.Distance(new Vector2(targetX, targetY), new Vector2(current.currentX, current.currentY)) <= 2.05f)
             {
-                return recalcPath(startX, startY, targetX, targetY);
+                return recalcPath(startX, startY, targetX, targetY, currDir);
             }
             List<Node> neighbourNodes = new List<Node>();//add the nodes from the map with new values
-            if (current.currentX + 1 < GameManager.randomMap.width)//if tile involves backtracking don't move their
+            if (current.currentX + 1 < GameManager.randomMap.width && !(closedNodes.Count == 1 && currDir == Vector2.left))//if tile involves backtracking don't move their
                 neighbourNodes.Add(map[current.currentX + 1, current.currentY]);
-            if(current.currentX - 1 >= 0)
+            if(current.currentX - 1 >= 0 && !(closedNodes.Count == 1 && currDir == Vector2.right))
                 neighbourNodes.Add(map[current.currentX - 1, current.currentY]);
-            if (current.currentY + 1 < GameManager.randomMap.height)
+            if (current.currentY + 1 < GameManager.randomMap.height && !(closedNodes.Count == 1 && currDir == Vector2.down))
                 neighbourNodes.Add(map[current.currentX, current.currentY + 1]);
-            if (current.currentY - 1 >= 0)
+            if (current.currentY - 1 >= 0 && !(closedNodes.Count == 1 && currDir == Vector2.up))
                 neighbourNodes.Add(map[current.currentX, current.currentY - 1]);
 
             //////////add Right
@@ -86,7 +92,8 @@ public class APathfinding : MonoBehaviour
 
             foreach (Node currNeighbour in neighbourNodes)
             {
-                if (!validPath(currNeighbour.currentX, currNeighbour.currentY) || closedNodes.Contains(currNeighbour))
+                Vector2 currDirToNode = (new Vector2(currNeighbour.currentX, currNeighbour.currentY) - new Vector2(current.currentX, current.currentY)).normalized;
+                if (!validPath(currNeighbour.currentX, currNeighbour.currentY) || closedNodes.Contains(currNeighbour)) //need put in here checking for backtracking
                 {
                     continue; //if node already checked or not valid go to next node
                 }
@@ -97,6 +104,8 @@ public class APathfinding : MonoBehaviour
                     currNeighbour.gCost = newMovementCostNeighbour;
                     currNeighbour.hCost = targetDist(currNeighbour.currentX, currNeighbour.currentY, targetX, targetY);
                     currNeighbour.parentNode = current;
+                   //  currNeighbour.dirToNode = (new Vector2(currNeighbour.currentX, currNeighbour.currentY) - new Vector2(current.currentX, current.currentY)).normalized;
+
                     if (!openNodes.Contains(currNeighbour))//get new path to nebour somehow
                     {
                         openNodes.Add(currNeighbour);
@@ -107,7 +116,7 @@ public class APathfinding : MonoBehaviour
             }            
         }return null;//no path found
     }
-    Node recalcPath(int startX, int startY, int targetX, int targetY)
+    Node recalcPath(int startX, int startY, int targetX, int targetY, Vector2 currDir)
     {
         Node current = map[targetX, targetY];
         List<Node> path = new List<Node>();
@@ -116,7 +125,15 @@ public class APathfinding : MonoBehaviour
             path.Add(current);
             current = current.parentNode;
         }
-        return path[path.Count - 1];//issue if trying it and on the target path already
+        if (path.Count > 0)
+        {
+           // if (newDir != -currDir)
+                return path[path.Count - 1];//issue if trying it and on the target path already
+           // else
+             //   return null;
+        }
+        else
+            return null;
     }
 
     bool inList(Node node, List<Node> nodeList)
