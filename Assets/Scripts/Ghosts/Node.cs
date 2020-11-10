@@ -20,8 +20,8 @@ public class Node
     {
         this.gCost = gCost;
         this.hCost = hCost;
-       // this.parentX = parentX;
-       // t//his.parentY = parentY;
+        // this.parentX = parentX;
+        // t//his.parentY = parentY;
         this.currentX = currentX;
         this.currentY = currentY;
     }

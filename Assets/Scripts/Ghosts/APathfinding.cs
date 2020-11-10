@@ -6,8 +6,8 @@ using UnityEngine;
 //approx issue is 106kb used
 public class APathfinding
 {/// <summary>
-/// /////////////////////////////biggest performance issue is when checking if a list contains a specific item
-/// </summary>
+ /// /////////////////////////////biggest performance issue is when checking if a list contains a specific item
+ /// </summary>
     //get distance to next location, will always retrun 1 as can never actually go diagronally
     //distance can be manhattan distance of xDist + yDist
     //in start position looks at all avaliable positions to look at in one tile away and chooses node with lowest fCost //for mine only need check 4 directions
@@ -24,7 +24,7 @@ public class APathfinding
     //hCost = distance from end node
     //fCost = gCost + hCost
     //has parent which is node came from
-  //  int startX, startY, targetX, targetY;
+    //  int startX, startY, targetX, targetY;
     int distToNode = 10;
     //////////public APathfinding(int startX, int startY, int targetX, int targetY)
     //////////{
@@ -39,7 +39,7 @@ public class APathfinding
     List<Node> openNodes = new List<Node>();
     List<Node> closedNodes = new List<Node>();
 
-    List<Node> usedNodes = new List<Node>();    
+    List<Node> usedNodes = new List<Node>();
     public List<Node> path = new List<Node>();
     Node[,] map;
     Node current;
@@ -122,7 +122,7 @@ public class APathfinding
                     // targetX = current.currentX; targetY = current.currentY;
                     return recalcPath(startX, startY, targetX, targetY, currDir);
                 }
-                else if(currentDistToTarget <= ghostDistToTarget - validDistToCheck)//distChange >= validDistToCheck)//always only use one if checking here right????????????
+                else if (currentDistToTarget <= ghostDistToTarget - validDistToCheck)//distChange >= validDistToCheck)//always only use one if checking here right????????????
                 {
                     //current = lowestClosed();
                     return recalcPath(startX, startY, current.currentX, current.currentY, currDir);
@@ -176,11 +176,11 @@ public class APathfinding
             //Debug.Log("No valid path found");
             return null;//no path found
         }
-        else if(path.Count > 1)
+        else if (path.Count > 1)
         {
             path.RemoveAt(path.Count - 1);
             return path[path.Count - 1];
-        }        
+        }
         path.Clear();
         //Debug.Log("No path avaliable to use " + path.Count);
         return null;
@@ -193,14 +193,14 @@ public class APathfinding
         {
             path.Add(current);
             current = current.parentNode;
-           // Debug.Log(current.currentX + "   " + current.currentY);
+            // Debug.Log(current.currentX + "   " + current.currentY);
         }
         if (path.Count > 0)
         {
             // if (newDir != -currDir)
-                return path[path.Count - 1];//issue if trying it and on the target path already
-           // else
-             //   return null;
+            return path[path.Count - 1];//issue if trying it and on the target path already
+                                        // else
+                                        //   return null;
         }
         else
             return null;

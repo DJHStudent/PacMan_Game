@@ -73,7 +73,8 @@ public class GhostController : MonoBehaviour
         if (currState != (int)CurrState.dead)
         {
             currState = (int)CurrState.normal;
-            pathFinder.path.Clear();
+            if(pathFinder != null)
+                pathFinder.path.Clear();
             animator.SetTrigger("norm" + getDir());
             if (!GameManager.audioManager.isDeadState())
                 GameManager.audioManager.normalState();
@@ -113,6 +114,8 @@ public class GhostController : MonoBehaviour
     }
     public void initialize()
     {
+        pathFinder = new APathfinding();//GameObject.Find("SceneManager").GetComponent<APathfinding>();
+        animator.speed = 1;
         if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
         {
             ghostSpawnDelay += 0.5f;
@@ -128,7 +131,6 @@ public class GhostController : MonoBehaviour
     }
     void initializeWait()
     {
-        pathFinder = new APathfinding();//GameObject.Find("SceneManager").GetComponent<APathfinding>();
         playerPos = GameManager.pacStudentController.gameObject;
         animator.speed = 1;
         if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
