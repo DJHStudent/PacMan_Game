@@ -39,6 +39,7 @@ public class RandomMapGenerator : MonoBehaviour
             for (int j = 0; j < height; j++)
             {
                 map[i, j] = new Node(i, j);
+
             }
         }
     }

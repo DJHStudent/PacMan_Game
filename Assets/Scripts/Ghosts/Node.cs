@@ -7,6 +7,9 @@ public class Node
     public int gCost, hCost;
     public int currentX, currentY, tileType;
     public Node parentNode;
+
+    public bool isOpen = false, isClosed = false;
+    public int iD;
     public Node(int currentX, int currentY)
     {
         this.currentX = currentX;

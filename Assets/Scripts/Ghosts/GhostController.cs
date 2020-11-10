@@ -17,6 +17,7 @@ public class nextPos
 public class GhostController : MonoBehaviour
 {
     public Animator animator;
+    SpriteRenderer spriteRenderer;
     Tween tween;
     float duration = .7f;
     enum CurrDir { up, left, right, down };
@@ -72,6 +73,7 @@ public class GhostController : MonoBehaviour
         if (currState != (int)CurrState.dead)
         {
             currState = (int)CurrState.normal;
+            pathFinder.path.Clear();
             animator.SetTrigger("norm" + getDir());
             if (!GameManager.audioManager.isDeadState())
                 GameManager.audioManager.normalState();
@@ -107,7 +109,7 @@ public class GhostController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         animator.speed = 0;
-        pathFinder = GameObject.Find("SceneManager").GetComponent<APathfinding>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
     public void initialize()
     {
@@ -126,6 +128,7 @@ public class GhostController : MonoBehaviour
     }
     void initializeWait()
     {
+        pathFinder = new APathfinding();//GameObject.Find("SceneManager").GetComponent<APathfinding>();
         playerPos = GameManager.pacStudentController.gameObject;
         animator.speed = 1;
         if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
@@ -293,7 +296,7 @@ public class GhostController : MonoBehaviour
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
         List<nextPos> nextPos = new List<nextPos>();//maybey change this here to a class with the nessesary info for directions as well as animation stuff
         //add wall sensing later
-        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation || inSpawn)
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation || inSpawn)// || !spriteRenderer.isVisible)
         {
             if (isDirSafe((int)CurrDir.up) && isCloser(currPos, currPos + directions[(int)CurrDir.up], target)) //if not backstepping && actually closer to target then next pos Valid
                 nextPos.Add(addDir((int)CurrDir.up, currPos));

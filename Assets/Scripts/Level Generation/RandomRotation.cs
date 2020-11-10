@@ -7,10 +7,4 @@ public class RandomRotation : MonoBehaviour
     {
         transform.rotation = Quaternion.Euler(0, 0, Random.Range(0.0f, 360.0f));
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
