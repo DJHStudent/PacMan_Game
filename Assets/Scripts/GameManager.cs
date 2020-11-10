@@ -48,7 +48,6 @@ public class GameManager : MonoBehaviour
         pacStudentController.initilize();
         audioManager.initialize();
         levelUIManager.initilize();
-        levelUIManager.statsManager.initilize();
     }
     void initializeGhosts()
     {

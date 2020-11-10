@@ -114,10 +114,11 @@ public class GhostController : MonoBehaviour
     }
     public void initialize()
     {
-        pathFinder = new APathfinding();//GameObject.Find("SceneManager").GetComponent<APathfinding>();
+        //GameObject.Find("SceneManager").GetComponent<APathfinding>();
         animator.speed = 1;
         if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
         {
+            pathFinder = new APathfinding();
             ghostSpawnDelay += 0.5f;
             StartCoroutine(startWait());
         }

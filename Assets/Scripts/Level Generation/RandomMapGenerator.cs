@@ -53,6 +53,7 @@ public class RandomMapGenerator : MonoBehaviour
         GameManager.levelUIManager.statsManager.determinePellets();
         Ghost4Waypoints.currDir = Vector2.right;
         wayPointStart.AddComponent<Ghost4Waypoints>();
+        GameManager.levelUIManager.statsManager.initilize();
     }
     public void createGhosts() //spawn in the ghosts in the ghost spawn area
     {

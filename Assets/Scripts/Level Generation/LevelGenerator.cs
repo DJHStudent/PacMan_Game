@@ -44,6 +44,7 @@ public class LevelGenerator : MonoBehaviour
         GameManager.levelUIManager.statsManager.determinePellets();
         Ghost4Waypoints.currDir = Vector2.right;
         wayPointStart.AddComponent<Ghost4Waypoints>();
+        GameManager.levelUIManager.statsManager.initilize();
     }
     void GenerateSections(int xPos, int yPos, int xScale, int yScale, bool delete) //determine position and scale of the other section
     {
