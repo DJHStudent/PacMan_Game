@@ -17,7 +17,7 @@ public class RandomMapGenerator : MonoBehaviour
     bool pathStarted = false;
     public Node[,] map;
     public int pelletAmount;
-    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner, teloBlocker, powerPellet };
+    enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner, teloBlocker, powerPellet, borderJoiner };
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
     Vector2 currPos, currDir;
@@ -419,6 +419,17 @@ public class RandomMapGenerator : MonoBehaviour
                         mapValue = map[i, j].tileType;
                     }
                 }
+                if (map[i, j].tileType == (int)TileType.borderWall)
+                {
+                    if (i + 1 < width && j + 1 < height && j - 1 >= 0 && outWallValidTile(i + 1, j) && diagWallCount(i + 1, j + 1, i + 1, j - 1)
+                    || i - 1 >= 0 && j + 1 < height && j - 1 >= 0 && outWallValidTile(i - 1, j) && diagWallCount(i - 1, j + 1, i - 1, j - 1)
+                    || j + 1 < height && i + 1 < width && i - 1 >= 0 && outWallValidTile(i, j + 1) && diagWallCount(i + 1, j + 1, i - 1, j + 1)
+                    || j - 1 >= 0 && i + 1 < width && i - 1 >= 0 && outWallValidTile(i, j - 1) && diagWallCount(i + 1, j - 1, i - 1, j - 1))
+                    {
+                        map[i, j].tileType = (int)TileType.borderJoiner;
+                        mapValue = map[i, j].tileType;
+                    }
+                }
                 if (mapValue != (int)TileType.spawnEmpty)
                 {
                     Quaternion rote;
@@ -429,15 +440,63 @@ public class RandomMapGenerator : MonoBehaviour
                         rote = determineRote(i, j);
                         mapValue = map[i, j].tileType;
                     }
-                    if(i == wayPointX && j == wayPointY) //if at the waypint start position then set this as the start position for the waypoint system
+                    if (mapValue == (int)TileType.borderJoiner)
+                    {
+                        if (j == height - 1)
+                        {
+                            if (i - 1 >= 0 && map[i - 1, j - 1].tileType == (int)TileType.path || i - 1 >= 0 && map[i - 1, j - 1].tileType == (int)TileType.powerPellet)
+                                rote = Quaternion.Euler(0, 0, 270);
+                            else
+                                rote = Quaternion.Euler(180, 0, 90);
+                        }
+                        else if (j == 0)
+                        {
+                            if (i - 1 >= 0 && map[i - 1, j + 1].tileType == (int)TileType.path || i - 1 >= 0 && map[i - 1, j + 1].tileType == (int)TileType.powerPellet)
+                                rote = Quaternion.Euler(180, 0, -90);
+                            else
+                                rote = Quaternion.Euler(0, 0, 90);
+                        }
+                        else if (i == width - 1)
+                        {
+                            if (j - 1 >= 0 && map[i - 1, j - 1].tileType == (int)TileType.path || j - 1 >= 0 && map[i - 1, j - 1].tileType == (int)TileType.powerPellet)
+                                rote = Quaternion.Euler(-180, 0, 180);
+                            else
+                                rote = Quaternion.Euler(0, 0, 180);
+                        }
+                        else if (i == 0)
+                        {
+                            if (j - 1 >= 0 && map[i + 1, j - 1].tileType == (int)TileType.path || j - 1 >= 0 && map[i + 1, j - 1].tileType == (int)TileType.powerPellet)
+                                rote = Quaternion.Euler(0, 0, 0);
+                            else
+                                rote = Quaternion.Euler(180, 0, 0);
+                        }
+                    }
+                    if (i == wayPointX && j == wayPointY) //if at the waypint start position then set this as the start position for the waypoint system
                         wayPointStart = Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform);
                     else
-                        Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform);
+                    {
+                       GameObject tile = Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform); //if only one diagonal detects stuff
+                       if(map[i,j].tileType == (int)TileType.borderWall)
+                        {
+                            if (i + 1 < width && j + 1 < height&& j - 1 >= 0&&outWallValidTile(i + 1, j) && !diagWallCount(i+1, j+1, i +1, j - 1)
+                                || i - 1 >= 0 && j + 1 < height && j - 1 >= 0 && outWallValidTile(i - 1, j) && !diagWallCount(i - 1, j + 1, i - 1, j - 1)
+                                || j + 1 < height && i + 1 < width  && i - 1 >= 0 && outWallValidTile(i, j + 1) && !diagWallCount(i + 1, j + 1, i - 1, j + 1)
+                                || j - 1 >= 0 && i + 1 < width && i - 1 >= 0 && outWallValidTile(i, j - 1) && !diagWallCount(i + 1, j - 1, i - 1, j - 1))
+                                tile.GetComponent<SpriteRenderer>().enabled = false;
+                        }
+                    }
                 }
             }
         }
     }
-
+    bool outWallValidTile(int i, int j)
+    {
+        return map[i, j].tileType == (int)TileType.emptyInside || map[i, j].tileType == (int)TileType.insideCorner || map[i, j].tileType == (int)TileType.empty;
+    }
+    bool diagWallCount(int iL, int jL, int iR, int jR)
+    {
+        return outWallValidTile(iL, jL) && !outWallValidTile(iR, jR) || !outWallValidTile(iL, jL) && outWallValidTile(iR, jR);
+    }
     Quaternion determineRote(int i, int j)//for the walls determine the rotation they should be set at
     {
         //get all 8 positions around it
