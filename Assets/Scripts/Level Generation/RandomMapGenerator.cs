@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 public class prevPos
 {
@@ -18,6 +19,7 @@ public class RandomMapGenerator : MonoBehaviour
     public Node[,] map;
     public int pelletAmount;
     enum TileType { empty, path, wall, borderWall, spawnEmpty, spawnOpening, emptyOutside, emptyInside, insideCorner, outsideCorner, teloBlocker, powerPellet, borderJoiner };
+    public Sprite outsideIn;
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
     Vector2 currPos, currDir;
@@ -419,18 +421,8 @@ public class RandomMapGenerator : MonoBehaviour
                         mapValue = map[i, j].tileType;
                     }
                 }
-                if (map[i, j].tileType == (int)TileType.borderWall)
-                {
-                    if (i + 1 < width && j + 1 < height && j - 1 >= 0 && outWallValidTile(i + 1, j) && diagWallCount(i + 1, j + 1, i + 1, j - 1)
-                    || i - 1 >= 0 && j + 1 < height && j - 1 >= 0 && outWallValidTile(i - 1, j) && diagWallCount(i - 1, j + 1, i - 1, j - 1)
-                    || j + 1 < height && i + 1 < width && i - 1 >= 0 && outWallValidTile(i, j + 1) && diagWallCount(i + 1, j + 1, i - 1, j + 1)
-                    || j - 1 >= 0 && i + 1 < width && i - 1 >= 0 && outWallValidTile(i, j - 1) && diagWallCount(i + 1, j - 1, i - 1, j - 1))
-                    {
-                        map[i, j].tileType = (int)TileType.borderJoiner;
-                        mapValue = map[i, j].tileType;
-                    }
-                }
-                if (mapValue != (int)TileType.spawnEmpty)
+
+                    if (mapValue != (int)TileType.spawnEmpty)
                 {
                     Quaternion rote;
                     if (mapValue == (int)TileType.spawnOpening || mapValue == (int)TileType.emptyOutside || mapValue == (int)TileType.emptyInside || isPath(i, j))
@@ -438,6 +430,7 @@ public class RandomMapGenerator : MonoBehaviour
                     else
                     {
                         rote = determineRote(i, j);
+                        checkBorderCorner(i, j);
                         mapValue = map[i, j].tileType;
                     }
                     if (mapValue == (int)TileType.borderJoiner)
@@ -476,18 +469,37 @@ public class RandomMapGenerator : MonoBehaviour
                     else
                     {
                        GameObject tile = Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform); //if only one diagonal detects stuff
-                       if(map[i,j].tileType == (int)TileType.borderWall)
+                       if(map[i,j].tileType == (int)TileType.borderWall)//decides if it should be a outsideIn wall type or not
                         {
-                            if (i + 1 < width && j + 1 < height&& j - 1 >= 0&&outWallValidTile(i + 1, j) && !diagWallCount(i+1, j+1, i +1, j - 1)
-                                || i - 1 >= 0 && j + 1 < height && j - 1 >= 0 && outWallValidTile(i - 1, j) && !diagWallCount(i - 1, j + 1, i - 1, j - 1)
-                                || j + 1 < height && i + 1 < width  && i - 1 >= 0 && outWallValidTile(i, j + 1) && !diagWallCount(i + 1, j + 1, i - 1, j + 1)
-                                || j - 1 >= 0 && i + 1 < width && i - 1 >= 0 && outWallValidTile(i, j - 1) && !diagWallCount(i + 1, j - 1, i - 1, j - 1))
-                                tile.GetComponent<SpriteRenderer>().enabled = false;
+                            if (i + 1 < width &&outWallValidTile(i + 1, j))//&& j + 1 < height&& j - 1 >= 0 && !diagWallCount(i+1, j+1, i +1, j - 1))
+                            {
+                                tile.GetComponent<SpriteRenderer>().sprite = outsideIn;
+                                tile.transform.rotation = Quaternion.Euler(0, 0, 180);
+                            }
+                            else if(i - 1 >= 0&& outWallValidTile(i - 1, j))// && j + 1 < height && j - 1 >= 0  && !diagWallCount(i - 1, j + 1, i - 1, j - 1))
+                            {
+                                tile.GetComponent<SpriteRenderer>().sprite = outsideIn;
+                                tile.transform.rotation = Quaternion.identity;
+                            }
+                            else if(j + 1 < height && outWallValidTile(i, j + 1))//&& i + 1 < width  && i - 1 >= 0  && !diagWallCount(i + 1, j + 1, i - 1, j + 1))
+                            {
+                                tile.GetComponent<SpriteRenderer>().sprite = outsideIn;
+                                tile.transform.rotation = Quaternion.Euler(0, 0, -90);
+                            }
+                            else if(j - 1 >= 0 && outWallValidTile(i, j - 1))//&& i + 1 < width && i - 1 >= 0  && !diagWallCount(i + 1, j - 1, i - 1, j - 1))//here//wall count returns true not false
+                            {
+                                tile.GetComponent<SpriteRenderer>().sprite = outsideIn;
+                                tile.transform.rotation = Quaternion.Euler(0, 0, 90);
+                            } 
                         }
                     }
                 }
             }
         }
+    }
+    bool notCorner(int iL, int jL, int iR, int jR)
+    {
+        return map[iL, jL].tileType != (int)TileType.outsideCorner && map[iR, jR].tileType != (int)TileType.outsideCorner;
     }
     bool outWallValidTile(int i, int j)
     {
@@ -561,7 +573,9 @@ public class RandomMapGenerator : MonoBehaviour
         else if(wallCount == 3)
         {
             if (!up || !down)
+            {
                 return Quaternion.Euler(0, 0, 90);
+            }
         }
         else if(wallCount == 2)
         {
@@ -595,6 +609,59 @@ public class RandomMapGenerator : MonoBehaviour
         }
         return Quaternion.identity;
     }
+
+    void checkBorderCorner(int i, int j)
+    {
+        if (map[i, j].tileType == (int)TileType.borderWall)
+        {
+            if (i + 1 < width - 2 && j + 1 < height && j - 1 > 0 && outWallValidTile(i + 1, j) && diagWallCount(i + 1, j + 1, i + 1, j - 1)// && notCorner(i, j + 1, i, j - 1)
+            || i - 1 > 1 && j + 1 < height - 1 && j - 1 > 0 && outWallValidTile(i - 1, j) && diagWallCount(i - 1, j + 1, i - 1, j - 1)// && notCorner(i, j + 1, i, j - 1)
+            || j + 1 < height - 2 && i + 1 < width - 1 && i - 1 > 0 && outWallValidTile(i, j + 1) && diagWallCount(i + 1, j + 1, i - 1, j + 1)// && notCorner(i + 1, j, i -1 , j)
+            || j - 1 > 1 && i + 1 < width - 1 && i - 1 > 0 && outWallValidTile(i, j - 1) && diagWallCount(i + 1, j - 1, i - 1, j - 1))// && notCorner(i + 1, j, i - 1, j))
+            {
+                map[i, j].tileType = (int)TileType.borderJoiner; //says its valid already
+                                                                 // mapValue = map[i, j].tileType;
+            }//idea of restructure like above but slight changes
+            else if (i == 0 && (j == height - 2 || j == 1) && (map[i, j + 1].tileType == (int)TileType.outsideCorner
+                || map[i, j - 1].tileType == (int)TileType.outsideCorner) && (map[i + 1, j].tileType == (int)TileType.insideCorner ||
+                map[i + 1, j].tileType == (int)TileType.empty && map[i + 2, j].tileType == (int)TileType.empty ||
+                map[i + 1, j].tileType == (int)TileType.empty && map[i + 2, j].tileType == (int)TileType.insideCorner))//j+ 1, j - 1 == corner && i + 1 == corner||i+ 1 && i + 2 == wall
+            {
+                map[i, j].tileType = (int)TileType.borderJoiner;
+               // mapValue = map[i, j].tileType;
+            }
+            else if (i == width - 1 && (j == height - 2 || j == 1) && (map[i, j + 1].tileType == (int)TileType.outsideCorner
+                || map[i, j - 1].tileType == (int)TileType.outsideCorner) && (map[i - 1, j].tileType == (int)TileType.insideCorner ||
+                map[i - 1, j].tileType == (int)TileType.empty && map[i - 2, j].tileType == (int)TileType.empty ||
+                map[i - 1, j].tileType == (int)TileType.empty && map[i - 2, j].tileType == (int)TileType.insideCorner))//j+ 1, j - 1 == corner && i + 1 == corner||i+ 1 && i + 2 == wall
+            {
+                map[i, j].tileType = (int)TileType.borderJoiner;
+               // mapValue = map[i, j].tileType;
+            }
+
+            //j stuff
+            else if (j == 0 && (i == width - 2 || i == 1) && (map[i + 1, j].tileType == (int)TileType.outsideCorner
+               || map[i - 1, j].tileType == (int)TileType.outsideCorner) && (map[i, j + 1].tileType == (int)TileType.insideCorner ||
+               map[i, j + 1].tileType == (int)TileType.empty && map[i, j + 2].tileType == (int)TileType.empty ||
+               map[i, j + 1].tileType == (int)TileType.empty && map[i, j + 2].tileType == (int)TileType.insideCorner))//j+ 1, j - 1 == corner && i + 1 == corner||i+ 1 && i + 2 == wall
+            {
+                map[i, j].tileType = (int)TileType.borderJoiner;
+              //  mapValue = map[i, j].tileType;
+            }
+            else if (j == height - 1 && (i == width - 2 || i == 1) && (map[i + 1, j].tileType == (int)TileType.outsideCorner
+                || map[i - 1, j].tileType == (int)TileType.outsideCorner) && (map[i, j - 1].tileType == (int)TileType.insideCorner ||
+                map[i, j - 1].tileType == (int)TileType.empty && map[i, j - 2].tileType == (int)TileType.empty ||
+                map[i, j - 1].tileType == (int)TileType.empty && map[i, j - 2].tileType == (int)TileType.insideCorner))//j+ 1, j - 1 == corner && i + 1 == corner||i+ 1 && i + 2 == wall
+            {
+                map[i, j].tileType = (int)TileType.borderJoiner;
+               // m/apValue = map[i, j].tileType;
+            }
+        }
+    }
+
+
+
+
     bool checkWallType(int i, int j)
     {
         bool safe = i >= 0 && j >= 0 && i < width && j < height;

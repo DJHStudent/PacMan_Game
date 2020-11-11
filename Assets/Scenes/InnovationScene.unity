@@ -11143,6 +11143,7 @@ MonoBehaviour:
   ghost3Amount: 10
   ghost4Amount: 10
   pelletAmount: 0
+  outsideIn: {fileID: 21300000, guid: 9e011658e0699724495aaae5b80fca26, type: 3}
   mapComponents:
   - {fileID: 5839215894744882725, guid: fa7c8ccca84a2ba4eb594edb0debda44, type: 3}
   - {fileID: 1260172239321137447, guid: fe75fd504e82b2540a4d7a446d66e709, type: 3}
