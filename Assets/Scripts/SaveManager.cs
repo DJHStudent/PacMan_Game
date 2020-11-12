@@ -1,10 +1,23 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
+public class SeedInfo
+{
+    public int seed, width, height;
+    public SeedInfo(int seed, int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+        this.seed = seed;
+    }
+}
 public class SaveManager : MonoBehaviour
 {
     const string saveTime = "time";
     const string saveScore = "score";
     private static SaveManager saveInstance;
+
+    public List<SeedInfo> seeds = new List<SeedInfo>();
     void Awake()
     {
         DontDestroyOnLoad(this);

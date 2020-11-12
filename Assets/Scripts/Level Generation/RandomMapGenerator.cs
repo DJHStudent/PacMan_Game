@@ -28,12 +28,24 @@ public class RandomMapGenerator : MonoBehaviour
     List<Vector2> joins = new List<Vector2>();
     public GameObject wayPointStart;
     int wayPointX, wayPointY;
+    int seed = 12345;
     void Start()
     {
         map = new Node[width, height];
+        Random.State orig = Random.state;
+        setSeed();
+        //Random.state = orig;
         makeMap();
         generateMap();
+        Random.state = orig;//reset back to original values for when doing ghost AI random movement
     }
+    void setSeed()
+    {
+        int randSeed = Random.Range(-2147483648, 2147483647);//all possible values for the seeds
+        Random.InitState(randSeed);
+        GameManager.saveManager.seeds.Add(new SeedInfo(randSeed, width, height));
+    }
+
     void makeMap()//creates a new node at each position all with specified lications
     {
         for (int i = 0; i < width; i++)
