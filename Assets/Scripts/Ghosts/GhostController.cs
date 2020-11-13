@@ -165,16 +165,17 @@ public class GhostController : MonoBehaviour
 
     void setNextPos()
     {
-        if (inSpawn == true && Vector2.Distance(new Vector2(transform.position.x, transform.position.y), leftBasePos) < 0.05f)
+        Vector2 pos = transform.position;
+        if (inSpawn == true && Vector2.Distance(new Vector2(pos.x, pos.y), leftBasePos) < 0.05f)
             inSpawn = false;
         if (tween != null)
             transform.position = tween.EndPos;
-        if (currState == (int)CurrState.dead && Vector2.Distance(new Vector2(transform.position.x, transform.position.y), spawnPos) < 0.05f)
+        if (currState == (int)CurrState.dead && Vector2.Distance(new Vector2(pos.x, pos.y), spawnPos) < 0.05f)
         {
             resetGhost();
             inSpawn = true;
         }
-        tween = new Tween(transform.position, getNextPos(), Time.time, duration);
+        tween = new Tween(pos, getNextPos(), Time.time, duration);
     }
 
     void resetGhost()//if ghost back in spawn after being eaten
@@ -403,7 +404,7 @@ public class GhostController : MonoBehaviour
     List<nextPos> ghost4NextPos()
     {
         Vector2 currPos = new Vector2((int)transform.position.x, (int)transform.position.y);
-        List<nextPos> nextPos = new List<nextPos>();
+        List<nextPos> nextPos;
         Vector2 pathNextPos;
         if (ghost4nextLocation != null && Vector2.Distance(currPos, ghost4nextLocation.transform.position) > 2.05f)
         {
@@ -470,7 +471,6 @@ public class GhostController : MonoBehaviour
                     }
                     else
                         nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
-                  //  ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
                 }
             }
             else //not hit anywall
@@ -482,7 +482,6 @@ public class GhostController : MonoBehaviour
                 }
                 else
                     nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
-               // ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
             }
         }
         else
@@ -496,11 +495,7 @@ public class GhostController : MonoBehaviour
             }
             else
                 nextPos = ghost2NextPos(ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj.transform.position);
-           // ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
         }
-        //check here
-      //  if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
-        //    nextPos[0].pos = determineNextPos(nextPos[0].pos);
         return nextPos;
     }
     Vector2 determineNextPos(Vector2 pos)

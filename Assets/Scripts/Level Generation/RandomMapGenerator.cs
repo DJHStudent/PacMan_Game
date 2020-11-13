@@ -28,24 +28,12 @@ public class RandomMapGenerator : MonoBehaviour
     List<Vector2> joins = new List<Vector2>();
     public GameObject wayPointStart;
     int wayPointX, wayPointY;
-    int seed = 12345;
     void Start()
     {
         map = new Node[width, height];
-        Random.State orig = Random.state;
-        setSeed();
-        //Random.state = orig;
         makeMap();
         generateMap();
-        Random.state = orig;//reset back to original values for when doing ghost AI random movement
     }
-    void setSeed()
-    {
-        int randSeed = Random.Range(-2147483648, 2147483647);//all possible values for the seeds
-        Random.InitState(randSeed);
-        GameManager.saveManager.seeds.Add(new SeedInfo(randSeed, width, height));
-    }
-
     void makeMap()//creates a new node at each position all with specified lications
     {
         for (int i = 0; i < width; i++)
@@ -104,7 +92,6 @@ public class RandomMapGenerator : MonoBehaviour
             map[startX + spawnWidth - 1, startY + i].tileType = (int)TileType.spawnEmpty;
         }
         prevPos.Add(new prevPos(new Vector2(startX + 5, startY -2), Vector2.zero)); //do this so that if path cannot reach below normally still can generate one down their
-       // Debug.Log(new Vector2(startX, startY - 2));
         for (int i = 2; i < spawnWidth - 2; i++)
         {
             for (int j = 2; j < spawnHeight - 2; j++)

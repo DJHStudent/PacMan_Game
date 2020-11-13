@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Node
 {
-    public int gCost, hCost;
+    public int gCost, hCost, fCost;
     public int currentX, currentY, tileType;
     public Node parentNode;
 
@@ -26,7 +26,7 @@ public class Node
         this.currentY = currentY;
     }
 
-    public int fCost()
+    public int fCostSet()
     {
         return gCost + hCost;
     }
