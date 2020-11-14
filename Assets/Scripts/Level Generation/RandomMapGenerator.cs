@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 public class prevPos
 {
     public Vector2 currPos, currDir;
@@ -23,6 +26,7 @@ public class RandomMapGenerator : MonoBehaviour
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
     Vector2 currPos, currDir;
+    int maxStackSize = 1;
 
     List<prevPos> prevPos = new List<prevPos>();
     List<Vector2> joins = new List<Vector2>();
@@ -50,12 +54,11 @@ public class RandomMapGenerator : MonoBehaviour
         ghostSpawn();
         makeBorder();
         makeTeloporters();       
-        makePath();
-        instanciateMap();
-        GameManager.levelUIManager.statsManager.determinePellets();
-        Ghost4Waypoints.currDir = Vector2.right;
-        wayPointStart.AddComponent<Ghost4Waypoints>();
-        GameManager.levelUIManager.statsManager.initilize();
+        StartCoroutine(makePath(0));
+        //GameManager.levelUIManager.statsManager.determinePellets();
+        //Ghost4Waypoints.currDir = Vector2.right;
+        //wayPointStart.AddComponent<Ghost4Waypoints>();
+        //GameManager.levelUIManager.statsManager.initilize();
     }
     public void createGhosts() //spawn in the ghosts in the ghost spawn area
     {
@@ -198,8 +201,9 @@ public class RandomMapGenerator : MonoBehaviour
             }
         }
     }
-    void makePath()
+    IEnumerator makePath(int pathAmount)
     {
+        int pathsDone = pathAmount;
         if (prevPos.Count > 0 && pathStarted == true)
             prevPos.RemoveAt(prevPos.Count - 1);
         else
@@ -221,18 +225,36 @@ public class RandomMapGenerator : MonoBehaviour
             joins.Add(currPos);
             prevPos.Add(new prevPos(currPos, currDir));
             nextPos = validDirections();
+            pathsDone++;
+            //////if(pathsDone >= maxStackSize)
+            //////{
+            //////    break;               
+            //////}
         }
+        if (pathsDone >= maxStackSize)
+        {
+            pathsDone = 0;
+            yield return null;
+        }
+        Debug.Log(prevPos.Count);
         //check if no valid positions then if possible add join
         if (prevPos.Count > 0)
         {
             currPos = new Vector2((int)prevPos[prevPos.Count - 1].currPos.x, (int)prevPos[prevPos.Count - 1].currPos.y);
             currDir = prevPos[prevPos.Count - 1].currDir;
-            makePath();
+            //StopAllCoroutines();
+            StartCoroutine(makePath(pathsDone));
         }
-        addJoin();
+        else
+        {
+            StopAllCoroutines();
+            //if()
+            StartCoroutine(addJoin());
+        }
     }
-    void addJoin()//after map made check if the joins are possible to be added so that less paths are one way
+    IEnumerator addJoin()//after map made check if the joins are possible to be added so that less paths are one way
     {
+        int pathsDone = 0;
         for (int i = 0; i < joins.Count; i++)
         {
             int posX = Mathf.RoundToInt(joins[i].x), posY = Mathf.RoundToInt(joins[i].y);
@@ -279,8 +301,14 @@ public class RandomMapGenerator : MonoBehaviour
                 map[posX, posY + 1].tileType = (int)TileType.path;
                 map[posX, posY + 2].tileType = (int)TileType.path;
             }
+            if (pathsDone >= maxStackSize)
+            {
+                pathsDone = 0;
+                yield return null;
+            }
 
         }
+        StartCoroutine(instanciateMap());
     }
     bool canSpawnPath(int posX, int posY)
     {
@@ -403,8 +431,9 @@ public class RandomMapGenerator : MonoBehaviour
         }
         return true;
     }
-    void instanciateMap()
+    IEnumerator instanciateMap()
     {
+        int pathsDone = 0;
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
@@ -502,12 +531,18 @@ public class RandomMapGenerator : MonoBehaviour
                         }
                     }
                 }
+                if (pathsDone >= maxStackSize)
+                {
+                    pathsDone = 0;
+                    yield return null; 
+                }
             }
         }
-    }
-    bool notCorner(int iL, int jL, int iR, int jR)
-    {
-        return map[iL, jL].tileType != (int)TileType.outsideCorner && map[iR, jR].tileType != (int)TileType.outsideCorner;
+        GameManager.levelUIManager.statsManager.determinePellets();
+        Ghost4Waypoints.currDir = Vector2.right;
+        wayPointStart.AddComponent<Ghost4Waypoints>();
+        GameManager.levelUIManager.statsManager.initilize();
+        SceneManager.UnloadSceneAsync(3);
     }
     bool outWallValidTile(int i, int j)
     {
@@ -645,46 +680,8 @@ public class RandomMapGenerator : MonoBehaviour
                 map[i, j].tileType = (int)TileType.borderJoiner;
             else if (i == width - 1 && j == height - 2 && outWallValidTile(i - 1, j) && !outWallValidTile(i - 1, j - 1))//check here
                 map[i, j].tileType = (int)TileType.borderJoiner;
-            //else if (i == 0 && (j == height - 2 || j == 1) && (map[i, j + 1].tileType == (int)TileType.outsideCorner
-            //    || map[i, j - 1].tileType == (int)TileType.outsideCorner) && (map[i + 1, j].tileType == (int)TileType.insideCorner ||
-            //    map[i + 1, j].tileType == (int)TileType.empty && map[i + 2, j].tileType == (int)TileType.empty ||
-            //    map[i + 1, j].tileType == (int)TileType.empty && map[i + 2, j].tileType == (int)TileType.insideCorner))//j+ 1, j - 1 == corner && i + 1 == corner||i+ 1 && i + 2 == wall
-            //{
-            //    map[i, j].tileType = (int)TileType.borderJoiner;
-            //   // mapValue = map[i, j].tileType;
-            //}
-            //else if (i == width - 1 && (j == height - 2 || j == 1) && (map[i, j + 1].tileType == (int)TileType.outsideCorner
-            //    || map[i, j - 1].tileType == (int)TileType.outsideCorner) && (map[i - 1, j].tileType == (int)TileType.insideCorner ||
-            //    map[i - 1, j].tileType == (int)TileType.empty && map[i - 2, j].tileType == (int)TileType.empty ||
-            //    map[i - 1, j].tileType == (int)TileType.empty && map[i - 2, j].tileType == (int)TileType.insideCorner))//j+ 1, j - 1 == corner && i + 1 == corner||i+ 1 && i + 2 == wall
-            //{
-            //    map[i, j].tileType = (int)TileType.borderJoiner;
-            //   // mapValue = map[i, j].tileType;
-            //}
-
-            ////j stuff
-            //else if (j == 0 && (i == width - 2 || i == 1) && (map[i + 1, j].tileType == (int)TileType.outsideCorner
-            //   || map[i - 1, j].tileType == (int)TileType.outsideCorner) && (map[i, j + 1].tileType == (int)TileType.insideCorner ||
-            //   map[i, j + 1].tileType == (int)TileType.empty && map[i, j + 2].tileType == (int)TileType.empty ||
-            //   map[i, j + 1].tileType == (int)TileType.empty && map[i, j + 2].tileType == (int)TileType.insideCorner))//j+ 1, j - 1 == corner && i + 1 == corner||i+ 1 && i + 2 == wall
-            //{
-            //    map[i, j].tileType = (int)TileType.borderJoiner;
-            //  //  mapValue = map[i, j].tileType;
-            //}
-            //else if (j == height - 1 && (i == width - 2 || i == 1) && (map[i + 1, j].tileType == (int)TileType.outsideCorner
-            //    || map[i - 1, j].tileType == (int)TileType.outsideCorner) && (map[i, j - 1].tileType == (int)TileType.insideCorner ||
-            //    map[i, j - 1].tileType == (int)TileType.empty && map[i, j - 2].tileType == (int)TileType.empty ||
-            //    map[i, j - 1].tileType == (int)TileType.empty && map[i, j - 2].tileType == (int)TileType.insideCorner))//j+ 1, j - 1 == corner && i + 1 == corner||i+ 1 && i + 2 == wall
-            //{
-            //    map[i, j].tileType = (int)TileType.borderJoiner;
-            //   // m/apValue = map[i, j].tileType;
-            //}
         }
     }
-
-
-
-
     bool checkWallType(int i, int j)
     {
         bool safe = i >= 0 && j >= 0 && i < width && j < height;

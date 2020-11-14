@@ -15,7 +15,7 @@ public class nextPos
 }
 
 public class GhostController : MonoBehaviour
-{
+{ //issues gjots sometimes not reset, pacman walk audio not instant if die, repawn and start moving again
     public Animator animator;
     SpriteRenderer spriteRenderer;
     Tween tween;
@@ -191,6 +191,7 @@ public class GhostController : MonoBehaviour
                     deadGhosts++;
                 if (!reset && ghostState.currState == (int)CurrState.scared)
                 {
+                    currState = (int)CurrState.scared;
                     scared();
                     reset = true;
                 }

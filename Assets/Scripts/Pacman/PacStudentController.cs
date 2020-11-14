@@ -124,21 +124,21 @@ public class PacStudentController : MonoBehaviour
 
     void getNextPos()//only do if first a valid key has been pressed
     {
-            if (tween != null)
-                transform.position = tween.EndPos; //ensures player at final position before moving to a new one
-            teleport();
-            int startI = Mathf.RoundToInt(transform.position.x), startJ = Mathf.RoundToInt(transform.position.y); //get player current position as an int
-            Vector2 nextPos = setNextPos(startI, startJ, lastInput);
-            if (lastInput != currentInput) //only nessesary do if the direction is actually changing
+        if (tween != null)
+            transform.position = tween.EndPos; //ensures player at final position before moving to a new one
+        teleport();
+        int startI = Mathf.RoundToInt(transform.position.x), startJ = Mathf.RoundToInt(transform.position.y); //get player current position as an int
+        Vector2 nextPos = setNextPos(startI, startJ, lastInput);
+        if (lastInput != currentInput) //only nessesary do if the direction is actually changing
+        {
+            if (!nextPosWall(nextPos)) //allow changing direction if the nextPos is not a wall
             {
-                if (!nextPosWall(nextPos)) //allow chaning direction if the nextPos is not a wall
-                {
-                    animator.SetTrigger("" + lastInput);
-                    currentInput = lastInput;
-                }
-                else //continue to move in same direction otherwise
-                    nextPos = setNextPos(startI, startJ, currentInput);
+                animator.SetTrigger("" + lastInput);
+                currentInput = lastInput;
             }
+            else //continue to move in same direction otherwise
+                nextPos = setNextPos(startI, startJ, currentInput);
+        }
         if (!nextPosWall(nextPos)) //if no wall found at nextPos allow movement to that position(done if the direction couldn't change and checks if current direction wall)
         {
             tween = new Tween(transform.position, nextPos, Time.time, duration);
