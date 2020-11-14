@@ -542,7 +542,7 @@ public class RandomMapGenerator : MonoBehaviour
         Ghost4Waypoints.currDir = Vector2.right;
         wayPointStart.AddComponent<Ghost4Waypoints>();
         GameManager.levelUIManager.statsManager.initilize();
-        SceneManager.UnloadSceneAsync(3);
+        SceneManager.UnloadSceneAsync(4);
     }
     bool outWallValidTile(int i, int j)
     {

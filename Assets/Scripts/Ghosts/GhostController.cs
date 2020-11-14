@@ -116,7 +116,7 @@ public class GhostController : MonoBehaviour
     {
         //GameObject.Find("SceneManager").GetComponent<APathfinding>();
         animator.speed = 1;
-        if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
         {
             pathFinder = new APathfinding();
             ghostSpawnDelay += 0.5f;
@@ -136,7 +136,7 @@ public class GhostController : MonoBehaviour
         animator.speed = 1;
         if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
             ghost4nextLocation = GameManager.levelGenerator.wayPointStart;
-        if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+        if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
         {
             GameObject[] spawnOpenings = GameObject.FindGameObjectsWithTag("spawnOpening");
             exitSpawnPos = new Vector2[] { spawnOpenings[0].transform.position, spawnOpenings[1].transform.position };
@@ -418,7 +418,7 @@ public class GhostController : MonoBehaviour
                 if (hitUp && hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
                 {
                     ghost4nextLocation = hitUp.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
                     {
                         pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
                         nextPos = ghost2NextPos(pathNextPos);
@@ -430,7 +430,7 @@ public class GhostController : MonoBehaviour
                 else if (hitDown && hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
                 {
                     ghost4nextLocation = hitDown.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
                     {
                         pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
                         nextPos = ghost2NextPos(pathNextPos);
@@ -442,7 +442,7 @@ public class GhostController : MonoBehaviour
                 else if (hitLeft && hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
                 {
                     ghost4nextLocation = hitLeft.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
                     {
                         pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
                         nextPos = ghost2NextPos(pathNextPos);
@@ -454,7 +454,7 @@ public class GhostController : MonoBehaviour
                 else if (hitRight && hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>() != null)
                 {
                     ghost4nextLocation = hitRight.collider.gameObject.GetComponent<Ghost4Waypoints>().nextObj;
-                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
                     {
                         pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
                         nextPos = ghost2NextPos(pathNextPos);
@@ -465,7 +465,7 @@ public class GhostController : MonoBehaviour
                 }
                 else //not hit anywall
                 {
-                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                    if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
                     {
                         pathNextPos = determineNextPos(ghost4nextLocation.transform.position);//need to set ghost waypoint here?
                         nextPos = ghost2NextPos(pathNextPos);
@@ -476,7 +476,7 @@ public class GhostController : MonoBehaviour
             }
             else //not hit anywall
             {
-                if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+                if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
                 {
                     pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
                     nextPos = ghost2NextPos(pathNextPos);

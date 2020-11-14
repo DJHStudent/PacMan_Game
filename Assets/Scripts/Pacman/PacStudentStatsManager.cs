@@ -21,7 +21,7 @@ public class PacStudentStatsManager : MonoBehaviour
     {
         if (GameManager.activeScene == (int)GameManager.ActiveScene.recreation)
             pelletAmount = GameManager.levelGenerator.pelletAmount * 4 - 2;
-        else if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+        else if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
             pelletAmount = GameManager.randomMap.pelletAmount;
     }
     IEnumerator startTimer() //countdown from 3

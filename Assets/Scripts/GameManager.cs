@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
 
     public static int activeScene;
     public LayerMask wall, innerWall;
-    public enum ActiveScene { recreation = 1, innovation};
+    public enum ActiveScene { recreation = 1, innovation, loading = 4};
     void Awake()
     {
         activeScene = SceneManager.GetActiveScene().buildIndex;
@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
             pacStudentController.leftTeloPoint = -14;
             pacStudentController.rightTeloPoint = 13;
         }
-        else if (activeScene == (int)ActiveScene.innovation)
+        else if (activeScene == (int)ActiveScene.innovation || activeScene == (int)ActiveScene.loading)
         {
             innovationSettings = GameObject.Find("InnovSceneManager").GetComponent<InnovationSettings>();
             randomMap = GetComponent<RandomMapGenerator>();
@@ -86,6 +86,7 @@ public class GameManager : MonoBehaviour
         randomMap.ghost2Amount = innovationSettings.ghost2Amount;
         randomMap.ghost3Amount = innovationSettings.ghost3Amount;
         randomMap.ghost4Amount = innovationSettings.ghost4Amount;
+        Debug.Log(innovationSettings);
         Destroy(innovationSettings.gameObject);
     }
 }

@@ -17,6 +17,6 @@ public class ButtonClick : MonoBehaviour
     {
         DontDestroyOnLoad(GameObject.Find("InnovSceneManager"));
         GameObject.Find("InnovSceneManager").GetComponent<InnovationSettings>().setValues();
-        SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+        SceneManager.LoadScene(scene);
     }
 }

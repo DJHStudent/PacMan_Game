@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/InnovationSettingScene.unity
     guid: 41da02f7ba22b564cb8ad79a9e4ae33f
+  - enabled: 1
+    path: Assets/Scenes/LoadingScene.unity
+    guid: 5de9b2ee2283c584aa4d555f50f70fe0
   m_configObjects: {}
