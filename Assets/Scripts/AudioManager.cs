@@ -34,7 +34,7 @@ public class AudioManager : MonoBehaviour
     public void noWall() //do if after hitting wall their is no wall anymore
     {
         pacStudentAudio.volume = 0.15f;
-        pacStudentAudio.loop = true;
+        //pacStudentAudio.loop = true;
         Invoke("resetAudio", pacStudentAudio.clip.length); //after audio clip finished play the pacWalk audio again
 
     }

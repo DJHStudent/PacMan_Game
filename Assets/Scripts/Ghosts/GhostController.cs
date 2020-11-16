@@ -489,7 +489,7 @@ public class GhostController : MonoBehaviour
         {
                 while (Vector2.Distance(currPos, ghost4nextLocation.transform.position) < 2.05f)
                     ghost4nextLocation = ghost4nextLocation.GetComponent<Ghost4Waypoints>().nextObj;
-            if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation)
+            if (GameManager.activeScene == (int)GameManager.ActiveScene.innovation || GameManager.activeScene == (int)GameManager.ActiveScene.loading)
             {
                 pathNextPos = determineNextPos(ghost4nextLocation.transform.position);
                 nextPos = ghost2NextPos(pathNextPos);

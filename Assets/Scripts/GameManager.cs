@@ -86,7 +86,6 @@ public class GameManager : MonoBehaviour
         randomMap.ghost2Amount = innovationSettings.ghost2Amount;
         randomMap.ghost3Amount = innovationSettings.ghost3Amount;
         randomMap.ghost4Amount = innovationSettings.ghost4Amount;
-        Debug.Log(innovationSettings);
         Destroy(innovationSettings.gameObject);
     }
 }

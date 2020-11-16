@@ -41,7 +41,6 @@ public class Ghost4Waypoints : MonoBehaviour //for the border wall set each vali
         {
             nextObj = hit.collider.gameObject;
             currDir = Vector2.up;
-         //   Debug.Log(currDir);
             posAccessible();
             return;
         }            

@@ -9,7 +9,8 @@ public class PacStudentController : MonoBehaviour
     public ParticleSystem wallPartical, deathPartical;
     Vector2 wallHitPoint, startPos;
     public float leftTeloPoint, rightTeloPoint;
-    char lastInput = 'D', currentInput = 'D';
+    char lastInput = 'A', currentInput = 'A';
+    bool trailStarted = false;
     public void initilize()
     {
         animator = GetComponent<Animator>();
@@ -68,6 +69,8 @@ public class PacStudentController : MonoBehaviour
                 deathPartical.Play();
                 deathPartical.transform.position = transform.position;
                 transform.position = startPos;
+                lastInput = 'A'; currentInput = 'A';
+                animator.SetTrigger("" + 'A');
                 pause();
                 tween = null;
             }
@@ -98,24 +101,32 @@ public class PacStudentController : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.A))
             {
                 lastInput = 'A';
+                if (currentInput.Equals(null)) //if just starting and input only just choosen
+                    currentInput = 'A';
                 if (tween == null)
                     getNextPos();
             }
             if (Input.GetKeyDown(KeyCode.W))
             {
                 lastInput = 'W';
+                if (currentInput.Equals(null))
+                    currentInput = 'W';
                 if (tween == null)
                     getNextPos();
             }
             if (Input.GetKeyDown(KeyCode.S))
             {
                 lastInput = 'S';
+                if (currentInput.Equals(null))
+                    currentInput = 'S';
                 if (tween == null)
                     getNextPos();
             }
             if (Input.GetKeyDown(KeyCode.D))
             {
                 lastInput = 'D';
+                if (currentInput.Equals(null))
+                    currentInput = 'D';
                 if (tween == null)
                     getNextPos();
             }
@@ -137,11 +148,19 @@ public class PacStudentController : MonoBehaviour
                 currentInput = lastInput;
             }
             else //continue to move in same direction otherwise
+            {
                 nextPos = setNextPos(startI, startJ, currentInput);
+            }
         }
         if (!nextPosWall(nextPos)) //if no wall found at nextPos allow movement to that position(done if the direction couldn't change and checks if current direction wall)
         {
             tween = new Tween(transform.position, nextPos, Time.time, duration);
+            if(!trailStarted)
+            {
+                trailStarted = true;
+                GetComponent<PacmanTrail>().startTrail();
+            }
+            //do the trail start thing
             if (animator.speed == 0) //continue if it was previouly stopped
             {
                 animator.speed = 1;

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -26,7 +25,6 @@ public class RandomMapGenerator : MonoBehaviour
     enum CurrDirection { Up, Down, Left, Right };
     public GameObject[] mapComponents;
     Vector2 currPos, currDir;
-    int maxStackSize = 1;
 
     List<prevPos> prevPos = new List<prevPos>();
     List<Vector2> joins = new List<Vector2>();
@@ -53,12 +51,13 @@ public class RandomMapGenerator : MonoBehaviour
     {
         ghostSpawn();
         makeBorder();
-        makeTeloporters();       
-        StartCoroutine(makePath(0));
-        //GameManager.levelUIManager.statsManager.determinePellets();
-        //Ghost4Waypoints.currDir = Vector2.right;
-        //wayPointStart.AddComponent<Ghost4Waypoints>();
-        //GameManager.levelUIManager.statsManager.initilize();
+        makeTeloporters();
+        makePath();
+        instanciateMap();
+        GameManager.levelUIManager.statsManager.determinePellets();
+        Ghost4Waypoints.currDir = Vector2.right;
+        wayPointStart.AddComponent<Ghost4Waypoints>();
+        GameManager.levelUIManager.statsManager.initilize();
     }
     public void createGhosts() //spawn in the ghosts in the ghost spawn area
     {
@@ -94,11 +93,11 @@ public class RandomMapGenerator : MonoBehaviour
         {
             map[startX + spawnWidth - 1, startY + i].tileType = (int)TileType.spawnEmpty;
         }
-        prevPos.Add(new prevPos(new Vector2(startX + 5, startY -2), Vector2.zero)); //do this so that if path cannot reach below normally still can generate one down their
+        prevPos.Add(new prevPos(new Vector2(startX + 5, startY - 2), Vector2.zero)); //do this so that if path cannot reach below normally still can generate one down their
         for (int i = 2; i < spawnWidth - 2; i++)
         {
             for (int j = 2; j < spawnHeight - 2; j++)
-                map[startX+i, startY+j].tileType = (int)TileType.spawnEmpty;
+                map[startX + i, startY + j].tileType = (int)TileType.spawnEmpty;
         }
         //make ghost exit
         map[startX + 4, startY + spawnHeight - 2].tileType = (int)TileType.spawnOpening;
@@ -112,7 +111,7 @@ public class RandomMapGenerator : MonoBehaviour
         int startY = Random.Range(2, height - teloHeight - 5);
         //spawn actual paths left side
         makeWidthLine(1, startY - 1, 0, teloWidth, (int)TileType.path);
-        makeWidthLine(1, startY + teloHeight, 0, teloWidth, (int)TileType.path);        
+        makeWidthLine(1, startY + teloHeight, 0, teloWidth, (int)TileType.path);
         for (int i = -1; i <= teloHeight; i++)
         {
             map[6, startY + i].tileType = (int)TileType.path;
@@ -120,12 +119,12 @@ public class RandomMapGenerator : MonoBehaviour
         }
         //spawn actual paths right side
         makeWidthLine(1, startY - 1, width - teloWidth - 1, teloWidth, (int)TileType.path);
-        makeWidthLine(1, startY + teloHeight, width - teloWidth -1 , teloWidth, (int)TileType.path);
+        makeWidthLine(1, startY + teloHeight, width - teloWidth - 1, teloWidth, (int)TileType.path);
 
         for (int i = -1; i <= teloHeight; i++)
         {
-            map[width- teloWidth -1, startY + i].tileType = (int)TileType.path;
-            joins.Add(new Vector2(width - teloWidth -1, startY + i));
+            map[width - teloWidth - 1, startY + i].tileType = (int)TileType.path;
+            joins.Add(new Vector2(width - teloWidth - 1, startY + i));
         }
 
         //spawn actuall walls left
@@ -171,12 +170,12 @@ public class RandomMapGenerator : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < teloWidth - 1; j++)
-                map[width-j-1, startY + 1 + i].tileType = (int)TileType.emptyOutside;
+                map[width - j - 1, startY + 1 + i].tileType = (int)TileType.emptyOutside;
         }
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < teloWidth - 1; j++)
-                map[width-j-1, startY + 7 + i].tileType = (int)TileType.emptyOutside;
+                map[width - j - 1, startY + 7 + i].tileType = (int)TileType.emptyOutside;
         }
     }
     void makeWidthLine(int startPos, int startY, int startX, int teloWidth, int tileType)
@@ -201,9 +200,8 @@ public class RandomMapGenerator : MonoBehaviour
             }
         }
     }
-    IEnumerator makePath(int pathAmount)
+    void makePath()
     {
-        int pathsDone = pathAmount;
         if (prevPos.Count > 0 && pathStarted == true)
             prevPos.RemoveAt(prevPos.Count - 1);
         else
@@ -212,7 +210,7 @@ public class RandomMapGenerator : MonoBehaviour
             currPos = new Vector2(1, height - 2);
         }
         List<Vector2> nextPos = validDirections();
-        if(pathStarted == false)
+        if (pathStarted == false)
             pathStarted = true;
 
         while (nextPos.Count > 0)
@@ -225,36 +223,18 @@ public class RandomMapGenerator : MonoBehaviour
             joins.Add(currPos);
             prevPos.Add(new prevPos(currPos, currDir));
             nextPos = validDirections();
-            pathsDone++;
-            //////if(pathsDone >= maxStackSize)
-            //////{
-            //////    break;               
-            //////}
         }
-        if (pathsDone >= maxStackSize)
-        {
-            pathsDone = 0;
-            yield return null;
-        }
-        Debug.Log(prevPos.Count);
         //check if no valid positions then if possible add join
         if (prevPos.Count > 0)
         {
             currPos = new Vector2((int)prevPos[prevPos.Count - 1].currPos.x, (int)prevPos[prevPos.Count - 1].currPos.y);
             currDir = prevPos[prevPos.Count - 1].currDir;
-            //StopAllCoroutines();
-            StartCoroutine(makePath(pathsDone));
+            makePath();
         }
-        else
-        {
-            StopAllCoroutines();
-            //if()
-            StartCoroutine(addJoin());
-        }
+        addJoin();
     }
-    IEnumerator addJoin()//after map made check if the joins are possible to be added so that less paths are one way
+    void addJoin()//after map made check if the joins are possible to be added so that less paths are one way
     {
-        int pathsDone = 0;
         for (int i = 0; i < joins.Count; i++)
         {
             int posX = Mathf.RoundToInt(joins[i].x), posY = Mathf.RoundToInt(joins[i].y);
@@ -301,14 +281,8 @@ public class RandomMapGenerator : MonoBehaviour
                 map[posX, posY + 1].tileType = (int)TileType.path;
                 map[posX, posY + 2].tileType = (int)TileType.path;
             }
-            if (pathsDone >= maxStackSize)
-            {
-                pathsDone = 0;
-                yield return null;
-            }
 
         }
-        StartCoroutine(instanciateMap());
     }
     bool canSpawnPath(int posX, int posY)
     {
@@ -325,7 +299,7 @@ public class RandomMapGenerator : MonoBehaviour
             if (currDir == Vector2.left)
             {
                 directions.Add(new Vector2(posX - 1, posY));
-                directions.Add(new Vector2(posX - 1, posY)); 
+                directions.Add(new Vector2(posX - 1, posY));
                 directions.Add(new Vector2(posX - 1, posY));
                 directions.Add(new Vector2(posX - 1, posY));
             }
@@ -336,7 +310,7 @@ public class RandomMapGenerator : MonoBehaviour
             if (currDir == Vector2.right)
             {
                 directions.Add(new Vector2(posX + 1, posY));
-                directions.Add(new Vector2(posX + 1, posY)); 
+                directions.Add(new Vector2(posX + 1, posY));
                 directions.Add(new Vector2(posX + 1, posY));
                 directions.Add(new Vector2(posX + 1, posY));
             }
@@ -366,12 +340,12 @@ public class RandomMapGenerator : MonoBehaviour
         return directions;
     }
     bool checkRight(int posX, int posY) //check straight up as well as the diagonals ,x+2 etc
-    {           
+    {
         if (posX + 2 < width && map[posX + 2, posY].tileType != (int)TileType.empty && map[posX + 2, posY].tileType != (int)TileType.borderWall)//check up
-                return false;
-        
+            return false;
+
         if (posX + 1 < width && map[posX + 1, posY].tileType != (int)TileType.empty && map[posX + 1, posY].tileType != (int)TileType.borderWall)//check up
-                return false;
+            return false;
         if (currDir != Vector2.left)
         {
 
@@ -383,15 +357,14 @@ public class RandomMapGenerator : MonoBehaviour
         return true;
     }
     bool checkLeft(int posX, int posY) //check straight up as well as the diagonals ,x+2 etc
-    {            
+    {
         if (posX - 2 > 0 && map[posX - 2, posY].tileType != (int)TileType.empty && map[posX - 2, posY].tileType != (int)TileType.borderWall)//check up
-                return false;
-        
+            return false;
+
         if (posX - 1 > 0 && map[posX - 1, posY].tileType != (int)TileType.empty && map[posX - 1, posY].tileType != (int)TileType.borderWall)//check up
-                return false;
+            return false;
         if (currDir != Vector2.right)
         {
-
             //diagonal
             if (posX - 2 > 0 && posY + 1 < height && map[posX - 2, posY + 1].tileType != (int)TileType.empty && map[posX - 2, posY + 1].tileType != (int)TileType.borderWall)//check up
                 return false;
@@ -401,9 +374,9 @@ public class RandomMapGenerator : MonoBehaviour
         return true;
     }
     bool checkDown(int posX, int posY) //check straight up as well as the diagonals ,x+2 etc
-    {            
+    {
         if (posY - 2 > 0 && map[posX, posY - 2].tileType != (int)TileType.empty && map[posX, posY - 2].tileType != (int)TileType.borderWall)//check up
-                return false;
+            return false;
         if (posY - 1 > 0 && map[posX, posY - 1].tileType != (int)TileType.empty && map[posX, posY - 1].tileType != (int)TileType.borderWall)//check up
             return false;
         if (currDir != Vector2.up)
@@ -416,12 +389,12 @@ public class RandomMapGenerator : MonoBehaviour
         return true;
     }
     bool checkUp(int posX, int posY) //check straight up as well as the diagonals ,x+2 etc
-    {      
-        
+    {
+
         if (posY + 2 < height && map[posX, posY + 2].tileType != (int)TileType.empty && map[posX, posY + 2].tileType != (int)TileType.borderWall)//check up
-                return false;
+            return false;
         if (posY + 1 < height && map[posX, posY + 1].tileType != (int)TileType.empty && map[posX, posY + 1].tileType != (int)TileType.borderWall)//check up
-                return false;
+            return false;
         if (currDir != Vector2.down)
         {
             if (posY + 2 < height && posX + 1 < width && map[posX + 1, posY + 2].tileType != (int)TileType.empty && map[posX + 1, posY + 2].tileType != (int)TileType.borderWall)//check up
@@ -431,9 +404,8 @@ public class RandomMapGenerator : MonoBehaviour
         }
         return true;
     }
-    IEnumerator instanciateMap()
+    void instanciateMap()
     {
-        int pathsDone = 0;
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
@@ -450,7 +422,7 @@ public class RandomMapGenerator : MonoBehaviour
                     }
                 }
 
-                    if (mapValue != (int)TileType.spawnEmpty)
+                if (mapValue != (int)TileType.spawnEmpty)
                 {
                     Quaternion rote;
                     if (mapValue == (int)TileType.spawnOpening || mapValue == (int)TileType.emptyOutside || mapValue == (int)TileType.emptyInside || isPath(i, j))
@@ -496,31 +468,31 @@ public class RandomMapGenerator : MonoBehaviour
                         wayPointStart = Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform);
                     else
                     {
-                       GameObject tile = Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform); //if only one diagonal detects stuff
-                       if(map[i,j].tileType == (int)TileType.borderWall)//decides if it should be a outsideIn wall type or not
+                        GameObject tile = Instantiate(mapComponents[mapValue], new Vector2(i, j), rote, this.transform); //if only one diagonal detects stuff
+                        if (map[i, j].tileType == (int)TileType.borderWall)//decides if it should be a outsideIn wall type or not
                         {
-                            if (i + 1 < width &&outWallValidTile(i + 1, j))//&& j + 1 < height&& j - 1 >= 0 && !diagWallCount(i+1, j+1, i +1, j - 1))
+                            if (i + 1 < width && outWallValidTile(i + 1, j))
                             {
                                 tile.GetComponent<SpriteRenderer>().sprite = outsideIn;
                                 tile.transform.rotation = Quaternion.Euler(0, 0, 180);
                             }
-                            else if(i - 1 >= 0&& outWallValidTile(i - 1, j))// && j + 1 < height && j - 1 >= 0  && !diagWallCount(i - 1, j + 1, i - 1, j - 1))
+                            else if (i - 1 >= 0 && outWallValidTile(i - 1, j))
                             {
                                 tile.GetComponent<SpriteRenderer>().sprite = outsideIn;
                                 tile.transform.rotation = Quaternion.identity;
                             }
-                            else if(j + 1 < height && outWallValidTile(i, j + 1))//&& i + 1 < width  && i - 1 >= 0  && !diagWallCount(i + 1, j + 1, i - 1, j + 1))
+                            else if (j + 1 < height && outWallValidTile(i, j + 1))
                             {
                                 tile.GetComponent<SpriteRenderer>().sprite = outsideIn;
                                 tile.transform.rotation = Quaternion.Euler(0, 0, -90);
                             }
-                            else if(j - 1 >= 0 && outWallValidTile(i, j - 1))//&& i + 1 < width && i - 1 >= 0  && !diagWallCount(i + 1, j - 1, i - 1, j - 1))//here//wall count returns true not false
+                            else if (j - 1 >= 0 && outWallValidTile(i, j - 1))
                             {
                                 tile.GetComponent<SpriteRenderer>().sprite = outsideIn;
                                 tile.transform.rotation = Quaternion.Euler(0, 0, 90);
                             }
                         }
-                       else if(map[i,j].tileType == (int)TileType.outsideCorner)
+                        else if (map[i, j].tileType == (int)TileType.outsideCorner)
                         {
                             if (i == 0 && j == 0 && outWallValidTile(i + 1, j + 1))
                                 tile.GetComponent<SpriteRenderer>().sprite = outsideInCorner;
@@ -531,18 +503,12 @@ public class RandomMapGenerator : MonoBehaviour
                         }
                     }
                 }
-                if (pathsDone >= maxStackSize)
-                {
-                    pathsDone = 0;
-                    yield return null; 
-                }
             }
         }
-        GameManager.levelUIManager.statsManager.determinePellets();
-        Ghost4Waypoints.currDir = Vector2.right;
-        wayPointStart.AddComponent<Ghost4Waypoints>();
-        GameManager.levelUIManager.statsManager.initilize();
-        SceneManager.UnloadSceneAsync(4);
+    }
+    bool notCorner(int iL, int jL, int iR, int jR)
+    {
+        return map[iL, jL].tileType != (int)TileType.outsideCorner && map[iR, jR].tileType != (int)TileType.outsideCorner;
     }
     bool outWallValidTile(int i, int j)
     {
@@ -584,12 +550,12 @@ public class RandomMapGenerator : MonoBehaviour
 
         if (wallCount == 4)
         {
-            if (diagWallCount == 4) 
+            if (diagWallCount == 4)
             {
                 map[i, j].tileType = (int)TileType.emptyInside;
                 return Quaternion.identity;
             }
-            else if(diagWallCount == 3)
+            else if (diagWallCount == 3)
             {
                 if (!rightUp)
                 {
@@ -613,14 +579,14 @@ public class RandomMapGenerator : MonoBehaviour
                 }
             }
         }
-        else if(wallCount == 3)
+        else if (wallCount == 3)
         {
             if (!up || !down)
             {
                 return Quaternion.Euler(0, 0, 90);
             }
         }
-        else if(wallCount == 2)
+        else if (wallCount == 2)
         {
             if (down && right)
             {
@@ -645,7 +611,7 @@ public class RandomMapGenerator : MonoBehaviour
             if (left && right)
                 return Quaternion.Euler(0, 0, 90);
         }
-        else if(wallCount == 1)
+        else if (wallCount == 1)
         {
             if (left || right)
                 return Quaternion.Euler(0, 0, 90);
@@ -657,13 +623,12 @@ public class RandomMapGenerator : MonoBehaviour
     {
         if (map[i, j].tileType == (int)TileType.borderWall)
         {
-            if (i + 1 < width - 2 && j + 1 < height && j - 1 > 0 && outWallValidTile(i + 1, j) && diagWallCount(i + 1, j + 1, i + 1, j - 1)// && notCorner(i, j + 1, i, j - 1)
-            || i - 1 > 1 && j + 1 < height - 1 && j - 1 > 0 && outWallValidTile(i - 1, j) && diagWallCount(i - 1, j + 1, i - 1, j - 1)// && notCorner(i, j + 1, i, j - 1)
-            || j + 1 < height - 2 && i + 1 < width - 1 && i - 1 > 0 && outWallValidTile(i, j + 1) && diagWallCount(i + 1, j + 1, i - 1, j + 1)// && notCorner(i + 1, j, i -1 , j)
-            || j - 1 > 1 && i + 1 < width - 1 && i - 1 > 0 && outWallValidTile(i, j - 1) && diagWallCount(i + 1, j - 1, i - 1, j - 1))// && notCorner(i + 1, j, i - 1, j))
+            if (i + 1 < width - 2 && j + 1 < height && j - 1 > 0 && outWallValidTile(i + 1, j) && diagWallCount(i + 1, j + 1, i + 1, j - 1)
+            || i - 1 > 1 && j + 1 < height - 1 && j - 1 > 0 && outWallValidTile(i - 1, j) && diagWallCount(i - 1, j + 1, i - 1, j - 1)
+            || j + 1 < height - 2 && i + 1 < width - 1 && i - 1 > 0 && outWallValidTile(i, j + 1) && diagWallCount(i + 1, j + 1, i - 1, j + 1)
+            || j - 1 > 1 && i + 1 < width - 1 && i - 1 > 0 && outWallValidTile(i, j - 1) && diagWallCount(i + 1, j - 1, i - 1, j - 1))
             {
-                map[i, j].tileType = (int)TileType.borderJoiner; //says its valid already
-                                                                 // mapValue = map[i, j].tileType;
+                map[i, j].tileType = (int)TileType.borderJoiner;
             }//idea of restructure like above but slight changes
             //bottom left
             else if (i == 1 && j == 0 && outWallValidTile(i, j + 1) && !outWallValidTile(i + 1, j + 1))
@@ -673,7 +638,7 @@ public class RandomMapGenerator : MonoBehaviour
             //bottom right
             else if (i == width - 2 && j == 0 && outWallValidTile(i, j + 1) && !outWallValidTile(i - 1, j + 1))
                 map[i, j].tileType = (int)TileType.borderJoiner;
-            else if (i == width - 1 && j == 1 && outWallValidTile(i-1, j) && !outWallValidTile(i - 1, j + 1))//check here
+            else if (i == width - 1 && j == 1 && outWallValidTile(i - 1, j) && !outWallValidTile(i - 1, j + 1))//check here
                 map[i, j].tileType = (int)TileType.borderJoiner;
             //top right
             else if (i == width - 2 && j == height - 1 && outWallValidTile(i, j - 1) && !outWallValidTile(i - 1, j - 1))//check here
@@ -682,10 +647,14 @@ public class RandomMapGenerator : MonoBehaviour
                 map[i, j].tileType = (int)TileType.borderJoiner;
         }
     }
+
+
+
+
     bool checkWallType(int i, int j)
     {
         bool safe = i >= 0 && j >= 0 && i < width && j < height;
-        return safe && !isPath(i,j) && map[i, j].tileType != (int)TileType.spawnEmpty && map[i, j].tileType != (int)TileType.spawnOpening && map[i, j].tileType != (int)TileType.emptyOutside;
+        return safe && !isPath(i, j) && map[i, j].tileType != (int)TileType.spawnEmpty && map[i, j].tileType != (int)TileType.spawnOpening && map[i, j].tileType != (int)TileType.emptyOutside;
     }
     void checkCornerType(int i, int j)
     {

@@ -61,7 +61,7 @@ public class APathfinding
             }
             usedNodes.Clear();
             ghostDistToTarget = Mathf.Abs(targetX - startX) + Mathf.Abs(targetY - startY);
-            currentTargetX = targetX; currentTargetY = targetY;
+            currentTargetX = targetX; currentTargetY = targetY;//if target changes from what currently know need update with new path
             map[startX, startY].gCost = 0;
             map[startX, startY].hCost = targetDist(startX, startY, targetX, targetY);
             map[startX, startY].fCostSet();
