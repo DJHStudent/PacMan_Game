@@ -324,7 +324,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: e420252b698ba0f4fb8fe4b24b63660d, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
-  m_Pitch: 1
+  m_Pitch: 1.01
   Loop: 1
   Mute: 0
   Spatialize: 0
@@ -2670,5 +2670,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: beacb9425f1561248a28ef943f399ece,
         type: 3}
+    - target: {fileID: 5420315146010365854, guid: 2d4ee802f661fde4da174491bcb5abc1,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5420315146010365854, guid: 2d4ee802f661fde4da174491bcb5abc1,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.4745098
+      objectReference: {fileID: 0}
+    - target: {fileID: 5420315146010365854, guid: 2d4ee802f661fde4da174491bcb5abc1,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.50980395
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2d4ee802f661fde4da174491bcb5abc1, type: 3}

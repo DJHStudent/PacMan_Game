@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Net;
 using UnityEngine;
 
 public class nextPos
@@ -17,7 +16,7 @@ public class nextPos
 public class GhostController : MonoBehaviour
 { //issues gjots sometimes not reset, pacman walk audio not instant if die, repawn and start moving again
     public Animator animator;
-    SpriteRenderer spriteRenderer;
+    SpriteRenderer miniMapRenderer;
     Tween tween;
     float duration = .7f;
     enum CurrDir { up, left, right, down };
@@ -33,7 +32,6 @@ public class GhostController : MonoBehaviour
     public static float ghostSpawnDelay = -.5f;
 
     bool notAtWall = true;
-    [SerializeField]
     GameObject ghost4nextLocation; //get the next waypoint pos for ghost 4
     public LayerMask ignorePellet, spawnLayer, outerWalls;
     APathfinding pathFinder;
@@ -42,6 +40,7 @@ public class GhostController : MonoBehaviour
         if (currState != (int)CurrState.dead)
         {
             currState = (int)CurrState.scared;
+            miniMapRenderer.color = new Color32(0, 64, 255, 255);
             notAtWall = true;
             animator.SetTrigger("scared" + getDir());
             if (!GameManager.audioManager.isDeadState())
@@ -61,6 +60,7 @@ public class GhostController : MonoBehaviour
     public void dead()
     {
         currState = (int)CurrState.dead;
+        miniMapRenderer.color = new Color32(0, 0, 0, 0);
         inSpawn = false;
         tween = null;
         setNextPos();
@@ -73,6 +73,7 @@ public class GhostController : MonoBehaviour
         if (currState != (int)CurrState.dead)
         {
             currState = (int)CurrState.normal;
+            miniMapRenderer.color = new Color32(255, 0, 0, 255);
             if(pathFinder != null)
                 pathFinder.path.Clear();
             animator.SetTrigger("norm" + getDir());
@@ -110,7 +111,7 @@ public class GhostController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         animator.speed = 0;
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        miniMapRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
     }
     public void initialize()
     {

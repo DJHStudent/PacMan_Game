@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class LevelUIManager : MonoBehaviour
 {
     public Text scoreTxt, scaredTimeTxt, startTimerTxt, playTimeTxt;
-    public GameObject startTimerImg;
+    public GameObject startTimerImg, miniMap;
 
     public List<Image> ghostLives = new List<Image>();
     public PacStudentStatsManager statsManager;
@@ -39,6 +39,10 @@ public class LevelUIManager : MonoBehaviour
     {
         startTimerTxt.text = value;
     }
+    public void setStartTimerColour(Color colour)
+    {
+        startTimerTxt.color = colour;
+    }
 
     public void startTimerVisable(bool visability)
     {
@@ -52,5 +56,13 @@ public class LevelUIManager : MonoBehaviour
     public void setScaredTime(string time)
     {
         scaredTimeTxt.text = time;
+    }
+
+    public void displayMiniMap()
+    {
+        if (miniMap.activeSelf)
+            miniMap.SetActive(false);
+        else
+            miniMap.SetActive(true);
     }
 }

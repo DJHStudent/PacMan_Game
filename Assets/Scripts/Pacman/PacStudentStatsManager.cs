@@ -133,14 +133,14 @@ public class PacStudentStatsManager : MonoBehaviour
     {
         lives--;
         GameManager.levelUIManager.setLives(lives);
-        gameOver();
+        gameOver("Game Over", Color.red);
     }
     public void removePellet()
     {
         pelletAmount--;
-        gameOver();
-    }
-    public void gameOver()
+        gameOver("You Win", new Color32(0, 224, 102, 255));
+    }   
+    public void gameOver(string text, Color textColour)
     {
         if(lives == 0 || pelletAmount == 0)
         {
@@ -163,7 +163,8 @@ public class PacStudentStatsManager : MonoBehaviour
             {
                 ghost.pause();
             }
-            GameManager.levelUIManager.setStartTimer("Game Over");
+            GameManager.levelUIManager.setStartTimer(text);
+            GameManager.levelUIManager.setStartTimerColour(textColour);
             GameManager.levelUIManager.startTimerVisable(true);
             Ghost4Waypoints.currDir = Vector2.zero;
             Ghost4Waypoints.straightWall = null;
