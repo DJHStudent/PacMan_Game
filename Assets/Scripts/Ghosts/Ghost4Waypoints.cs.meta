@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7b123771ed64d7641bbf4baeea07adff
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - nextObj: {instanceID: 0}
+  - straightWallOut: {fileID: 21300000, guid: 6f200968999cef24ab6efe3f9b31dcfe, type: 3}
+  - straightWallIn: {fileID: 21300000, guid: 0c77554a08c592c4b9156478111f36a7, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
