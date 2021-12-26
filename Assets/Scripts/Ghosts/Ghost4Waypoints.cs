@@ -35,7 +35,7 @@ public class Ghost4Waypoints : MonoBehaviour //for the border wall set each vali
             nextObj.AddComponent<Ghost4Waypoints>();
     }
     public void nextWall(Vector2 checkFromPos)
-    {
+{
         RaycastHit2D hit = nextPosWall(checkFromPos,Vector2.up, 1, wall);
         if (Vector2.up != -currDir && hit && !hit.collider.gameObject.GetComponent<Ghost4Waypoints>())
         {

@@ -198,7 +198,7 @@ public class RandomMapGenerator : MonoBehaviour
             }
         }
     }
-    void makePath()
+    void makePath() //uses a recursive backtracking method
     {
         if (prevPos.Count > 0 && pathStarted == true)
             prevPos.RemoveAt(prevPos.Count - 1);
@@ -451,7 +451,7 @@ public class RandomMapGenerator : MonoBehaviour
         }
         return true;
     }
-    void instanciateMap()
+    void instanciateMap() //spawn in actuall pellet and wall sprites
     {
         for (int i = 0; i < width; i++)
         {
