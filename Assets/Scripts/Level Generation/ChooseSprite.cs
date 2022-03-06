@@ -2,7 +2,7 @@
 
 public class ChooseSprite : MonoBehaviour
 {
-    public Sprite[] sprite; 
+    public Sprite[] sprite;
     public float[] probs;
     void Start()
     {
