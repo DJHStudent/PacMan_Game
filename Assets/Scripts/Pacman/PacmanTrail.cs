@@ -3,13 +3,13 @@
 public class PacmanTrail : MonoBehaviour
 {
     public GameObject trail;
-    public void startTrail()
+    void Start()
     {
         Invoke("wait", .19f);
     }
+
     void wait()
     {
         trail.SetActive(true);
-        Destroy(this);
     }
 }
